@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>日常作業フロー | VR-SKATE</title>
+  <style>
+    :root {
+      --primary: #e2231a;
+      --secondary: #0066cc;
+      --accent: #00b06b;
+      --bg: #f8f9fa;
+      --card-bg: #ffffff;
+      --text: #1a1a2e;
+      --text-muted: #6b7280;
+      --border: #e5e7eb;
+      --shadow: 0 4px 24px rgba(0,0,0,0.08);
+      --radius: 16px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', 'Hiragino Sans', 'Meiryo', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      color: white;
+      padding: 24px 32px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.3);
+    }
+    header .logo { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
+    header .logo span { color: #e2231a; }
+    header .subtitle { font-size: 13px; opacity: 0.65; margin-top: 4px; }
+
+    main {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+    }
+
+    /* STEP NAV */
+    .step-nav {
+      display: flex;
+      gap: 0;
+      justify-content: center;
+      margin-bottom: 36px;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .step-dot {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--border);
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 2px solid transparent;
+    }
+    .step-dot.active { background: var(--secondary); color: white; border-color: var(--secondary); transform: scale(1.15); }
+    .step-dot.done { background: var(--accent); color: white; }
+    .step-dot:hover:not(.active) { border-color: var(--secondary); color: var(--secondary); }
+
+    /* CARD */
+    .page { display: none; animation: fadeIn 0.3s ease; }
+    .page.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 36px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      margin-bottom: 20px;
+    }
+
+    .step-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--secondary);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+    h1 { font-size: 24px; font-weight: 800; margin-bottom: 16px; line-height: 1.3; }
+    h2 { font-size: 17px; font-weight: 700; margin: 24px 0 10px; }
+    p { font-size: 15px; line-height: 1.75; margin-bottom: 12px; }
+
+    .code-block {
+      background: #1e1e2e;
+      color: #cdd6f4;
+      border-radius: 10px;
+      padding: 18px 20px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 14px;
+      margin: 12px 0 18px;
+      overflow-x: auto;
+      line-height: 1.8;
+    }
+    .code-block .cmd { color: #89dceb; }
+    .code-block .comment { color: #6c7086; font-style: italic; }
+
+    .info-box {
+      border-left: 4px solid var(--secondary);
+      background: #f0f6ff;
+      padding: 14px 18px;
+      border-radius: 0 10px 10px 0;
+      margin: 14px 0;
+      font-size: 14px;
+      line-height: 1.7;
+    }
+    .info-box.tip { border-left-color: #8b5cf6; background: #f5f3ff; }
+    .info-box.warn { border-left-color: #f59e0b; background: #fffbeb; }
+    .info-box.success { border-left-color: var(--accent); background: #f0faf6; }
+    .info-box strong { display: block; margin-bottom: 5px; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.7; }
+
+    .steps { list-style: none; margin: 14px 0; }
+    .steps li { display: flex; gap: 14px; margin-bottom: 14px; align-items: flex-start; }
+    .step-num {
+      flex-shrink: 0;
+      width: 28px; height: 28px;
+      background: var(--secondary);
+      color: white;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700;
+      margin-top: 1px;
+    }
+    .step-body { flex: 1; font-size: 15px; line-height: 1.7; }
+
+    .hl { background: #fef9c3; padding: 1px 4px; border-radius: 4px; }
+    kbd {
+      display: inline-block;
+      padding: 2px 8px;
+      background: #f3f4f6;
+      border: 1px solid #d1d5db;
+      border-bottom: 3px solid #9ca3af;
+      border-radius: 5px;
+      font-family: monospace;
+      font-size: 13px;
+    }
+
+    /* NAV BUTTONS */
+    .nav-btns {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 8px;
+    }
+    .btn-back {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 10px 18px;
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-back:hover { background: var(--bg); color: var(--text); }
+    .btn-next {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 14px 28px;
+      background: linear-gradient(135deg, var(--secondary), #004ea6);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px; font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-next:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,102,204,0.35); }
+    .btn-next:disabled { opacity: 0.4; cursor: default; transform: none; box-shadow: none; }
+
+    /* COMPLETION */
+    .completion-box { text-align: center; padding: 32px 16px; }
+    .completion-icon { font-size: 60px; margin-bottom: 14px; }
+    .completion-title { font-size: 22px; font-weight: 800; margin-bottom: 10px; }
+    .completion-desc { color: var(--text-muted); font-size: 15px; line-height: 1.7; }
+
+    hr { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
+
+    @media (max-width: 600px) {
+      main { padding: 24px 16px 60px; }
+      .card { padding: 24px 18px; }
+      h1 { font-size: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo"><span>VR</span>-SKATE</div>
+  <div class="subtitle">Roblox × Rojo × GitHub ／ 日常作業フロー</div>
+</header>
+
+<main>
+
+  <!-- STEP NAV -->
+  <div class="step-nav">
+    <div class="step-dot active" onclick="goTo(0)" title="作業開始">1</div>
+    <div class="step-dot" onclick="goTo(1)" title="ブランチを作る">2</div>
+    <div class="step-dot" onclick="goTo(2)" title="作業する">3</div>
+    <div class="step-dot" onclick="goTo(3)" title="コミット＆プッシュ">4</div>
+    <div class="step-dot" onclick="goTo(4)" title="Pull Request">5</div>
+    <div class="step-dot" onclick="goTo(5)" title="完了">6</div>
+  </div>
+
+  <!-- ===== STEP 1: 作業開始 ===== -->
+  <div class="page active" id="step-0">
+    <div class="card">
+      <div class="step-label">Step 1 / 5</div>
+      <h1>🌅 作業開始：最新のコードを取得する</h1>
+      <p>作業を始める前に、必ず <code>main</code> ブランチを最新の状態にします。他のメンバーが加えた変更を自分のPCに反映させる作業です。</p>
+
+      <div class="info-box tip">
+        <strong>💡 なぜ毎回やるの？</strong>
+        チームで作業していると、自分が作業していない間に他のメンバーがコードを更新していることがあります。古いコードのまま作業するとコンフリクト（競合）の原因になるため、必ず最初にこの手順を行います。
+      </div>
+
+      <h2>VS Codeのターミナルを開く</h2>
+      <p><kbd>Cmd</kbd>+<kbd>`</kbd>（Windowsは <kbd>Ctrl</kbd>+<kbd>`</kbd>）でターミナルを開く</p>
+
+      <h2>mainブランチに移動して最新を取得</h2>
+      <div class="code-block">
+        <span class="comment"># mainブランチに移動する</span><br>
+        <span class="cmd">git checkout main</span><br><br>
+        <span class="comment"># GitHubから最新のコードを取得する</span><br>
+        <span class="cmd">git pull origin main</span>
+      </div>
+
+      <div class="info-box">
+        <strong>ℹ️ Already up to date. と表示された場合</strong>
+        すでに最新の状態です。そのまま次のステップに進んでOKです。
+      </div>
+    </div>
+    <div class="nav-btns">
+      <span></span>
+      <button class="btn-next" onclick="goTo(1)">次へ：ブランチを作る ›</button>
+    </div>
+  </div>
+
+  <!-- ===== STEP 2: ブランチを作る ===== -->
+  <div class="page" id="step-1">
+    <div class="card">
+      <div class="step-label">Step 2 / 5</div>
+      <h1>🌿 作業ブランチを作る</h1>
+
+      <div class="info-box tip">
+        <strong>💡 「ブランチ」って何？</strong>
+        プロジェクトのコードを「コピーして別の場所で作業する」イメージです。チームで共有している <code>main</code>（本番コード）を直接触らず、自分専用の作業スペース（ブランチ）を作ってそこで編集します。
+      </div>
+
+      <div class="info-box">
+        <strong>ℹ️ ブランチは毎回使い捨て</strong>
+        作業のたびに新しいブランチを作ります。前回のブランチは使い回しません。名前は作業内容がわかるものにしましょう。<br><br>
+        例：<code>feature/enemy-ai</code>（敵AIを追加）、<code>fix/jump-bug</code>（ジャンプのバグ修正）
+      </div>
+
+      <h2>ブランチを作成して移動する</h2>
+      <div class="code-block">
+        <span class="comment"># ブランチを作成して、そのブランチに移動する</span><br>
+        <span class="cmd">git checkout -b feature/ブランチ名</span>
+      </div>
+
+      <p>例えば「スコアボードを追加する」作業なら：</p>
+      <div class="code-block">
+        <span class="cmd">git checkout -b feature/scoreboard</span>
+      </div>
+
+      <div class="info-box success">
+        <strong>✅ 確認方法</strong>
+        <code>git branch</code> を実行すると現在いるブランチが <code>*</code> で表示されます。自分が作ったブランチ名に <code>*</code> がついていればOKです。
+      </div>
+    </div>
+    <div class="nav-btns">
+      <button class="btn-back" onclick="goTo(0)">← 戻る</button>
+      <button class="btn-next" onclick="goTo(2)">次へ：作業する ›</button>
+    </div>
+  </div>
+
+  <!-- ===== STEP 3: 作業する ===== -->
+  <div class="page" id="step-2">
+    <div class="card">
+      <div class="step-label">Step 3 / 5</div>
+      <h1>✏️ VS Codeで作業する</h1>
+      <p>ブランチを作ったら、VS Codeでスクリプトを編集します。Rojoを起動することでRoblox Studioにリアルタイムで反映されます。</p>
+
+      <h2>Rojoサーバーを起動する</h2>
+      <p>ターミナルで以下を実行：</p>
+      <div class="code-block">
+        <span class="cmd">rojo serve</span>
+      </div>
+      <p><code>Serving on port 34872</code> のようなメッセージが出たらOK。</p>
+
+      <h2>Roblox Studioと接続する</h2>
+      <ul class="steps">
+        <li><div class="step-num">1</div><div class="step-body">Roblox Studioを開く</div></li>
+        <li><div class="step-num">2</div><div class="step-body">プラグインバーの <span class="hl">Rojo</span> アイコンをクリック → <span class="hl">Connect</span></div></li>
+        <li><div class="step-num">3</div><div class="step-body">VS Codeでスクリプトを編集すると、Studioにリアルタイムで反映される</div></li>
+      </ul>
+
+      <div class="info-box tip">
+        <strong>💡 作業が終わったら</strong>
+        Rojoは <kbd>Ctrl</kbd>+<kbd>C</kbd>（Macも同じ）でターミナルから停止できます。次のステップでコミット作業を行います。
+      </div>
+    </div>
+    <div class="nav-btns">
+      <button class="btn-back" onclick="goTo(1)">← 戻る</button>
+      <button class="btn-next" onclick="goTo(3)">次へ：コミット＆プッシュ ›</button>
+    </div>
+  </div>
+
+  <!-- ===== STEP 4: コミット＆プッシュ ===== -->
+  <div class="page" id="step-3">
+    <div class="card">
+      <div class="step-label">Step 4 / 5</div>
+      <h1>☁️ 変更をコミット＆プッシュする</h1>
+
+      <div class="info-box tip">
+        <strong>💡 「コミット」「プッシュ」って何？</strong>
+        <strong>コミット</strong>とは、変更内容に名前をつけて記録することです（セーブポイントのイメージ）。<br>
+        <strong>プッシュ</strong>とは、そのコミットをGitHubのオンライン上に送ることです。
+      </div>
+
+      <h2>① 変更を確認する</h2>
+      <div class="code-block">
+        <span class="comment"># 変更されたファイルの一覧を確認</span><br>
+        <span class="cmd">git status</span>
+      </div>
+
+      <h2>② 変更をステージングする</h2>
+      <div class="code-block">
+        <span class="comment"># 変更したファイルをすべて追加</span><br>
+        <span class="cmd">git add .</span>
+      </div>
+
+      <h2>③ コミットする</h2>
+      <div class="code-block">
+        <span class="comment"># 変更内容がわかるメッセージをつけて記録する</span><br>
+        <span class="cmd">git commit -m "スコアボードを追加"</span>
+      </div>
+      <div class="info-box">
+        <strong>ℹ️ コミットメッセージについて</strong>
+        <code>" "</code> の中は何をしたかを日本語で書いてOKです。後から見たときにわかる内容にしましょう。
+      </div>
+
+      <h2>④ GitHubにプッシュする</h2>
+      <div class="code-block">
+        <span class="comment"># 自分のブランチをGitHubに送る（ブランチ名は自分のものに変更）</span><br>
+        <span class="cmd">git push origin feature/ブランチ名</span>
+      </div>
+    </div>
+    <div class="nav-btns">
+      <button class="btn-back" onclick="goTo(2)">← 戻る</button>
+      <button class="btn-next" onclick="goTo(4)">次へ：Pull Request ›</button>
+    </div>
+  </div>
+
+  <!-- ===== STEP 5: Pull Request ===== -->
+  <div class="page" id="step-4">
+    <div class="card">
+      <div class="step-label">Step 5 / 5</div>
+      <h1>🔀 Pull Request（PR）を作成する</h1>
+
+      <div class="info-box tip">
+        <strong>💡 「Pull Request（PR）」って何？</strong>
+        自分のブランチの変更を <code>main</code> に取り込んでもらうための「申請」です。管理者が内容を確認・承認してからmainに反映されます。直接mainを書き換えるのではなく、必ずこのPRを通すことでミスや事故を防ぎます。
+      </div>
+
+      <ul class="steps">
+        <li>
+          <div class="step-num">1</div>
+          <div class="step-body">
+            ブラウザで <strong>github.com/VR-SKATE/リポジトリ名</strong> を開く
+          </div>
+        </li>
+        <li>
+          <div class="step-num">2</div>
+          <div class="step-body">
+            画面上部に緑色のバナーで <span class="hl">Compare &amp; pull request</span> ボタンが表示されるのでクリック<br>
+            <small>（表示されない場合は <span class="hl">Pull requests</span> タブ → <span class="hl">New pull request</span>）</small>
+          </div>
+        </li>
+        <li>
+          <div class="step-num">3</div>
+          <div class="step-body">
+            タイトルに作業内容を入力（例：「スコアボードを追加」）<br>
+            必要に応じてコメント欄に詳細を記入する
+          </div>
+        </li>
+        <li>
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <span class="hl">Create pull request</span> をクリック
+          </div>
+        </li>
+        <li>
+          <div class="step-num">5</div>
+          <div class="step-body">
+            Discordで管理者にPRを作成したことを連絡する
+          </div>
+        </li>
+        <li>
+          <div class="step-num">6</div>
+          <div class="step-body">
+            管理者が承認・mergeしたら完了 🎉<br>
+            次の作業はStep 1からやり直します
+          </div>
+        </li>
+      </ul>
+
+      <div class="info-box warn">
+        <strong>⚠️ コンフリクトが発生したら</strong>
+        他のメンバーが同じファイルを編集していた場合、競合（コンフリクト）が起きることがあります。無理に解決しようとせず、管理者に相談してください。
+      </div>
+    </div>
+    <div class="nav-btns">
+      <button class="btn-back" onclick="goTo(3)">← 戻る</button>
+      <button class="btn-next" onclick="goTo(5)">完了！ ›</button>
+    </div>
+  </div>
+
+  <!-- ===== 完了 ===== -->
+  <div class="page" id="step-5">
+    <div class="card">
+      <div class="completion-box">
+        <div class="completion-icon">🎉</div>
+        <div class="completion-title">お疲れさまでした！</div>
+        <p class="completion-desc">
+          PRが承認されたら、この作業フローは完了です。<br>
+          次の作業はまた Step 1 からスタートします。
+        </p>
+      </div>
+      <hr>
+      <h2>📋 毎回の作業チェックリスト</h2>
+      <ul class="steps">
+        <li><div class="step-num">1</div><div class="step-body"><code>git checkout main</code> → <code>git pull origin main</code></div></li>
+        <li><div class="step-num">2</div><div class="step-body"><code>git checkout -b feature/ブランチ名</code>（新しいブランチを作る）</div></li>
+        <li><div class="step-num">3</div><div class="step-body">VS Code + Rojoで作業する</div></li>
+        <li><div class="step-num">4</div><div class="step-body"><code>git add .</code> → <code>git commit -m "内容"</code> → <code>git push origin feature/ブランチ名</code></div></li>
+        <li><div class="step-num">5</div><div class="step-body">GitHubでPull Requestを作成 → 管理者に連絡</div></li>
+      </ul>
+    </div>
+    <div class="nav-btns">
+      <button class="btn-back" onclick="goTo(4)">← 戻る</button>
+      <button class="btn-next" onclick="goTo(0)">🔄 Step 1 に戻る</button>
+    </div>
+  </div>
+
+</main>
+
+<script>
+  const total = 6;
+  let current = 0;
+
+  function goTo(idx) {
+    document.getElementById('step-' + current).classList.remove('active');
+    current = idx;
+    document.getElementById('step-' + current).classList.add('active');
+    updateNav();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function updateNav() {
+    document.querySelectorAll('.step-dot').forEach((dot, i) => {
+      dot.classList.remove('active', 'done');
+      if (i === current) dot.classList.add('active');
+      else if (i < current) dot.classList.add('done');
+    });
+  }
+</script>
+
+</body>
+</html>
