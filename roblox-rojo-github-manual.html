@@ -1,0 +1,1335 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Roblox + Rojo + GitHub セットアップマニュアル</title>
+  <style>
+    :root {
+      --primary: #e2231a;
+      --primary-dark: #b01a13;
+      --secondary: #0066cc;
+      --secondary-dark: #0052a3;
+      --accent: #00b06b;
+      --accent-dark: #008a54;
+      --bg: #f8f9fa;
+      --card-bg: #ffffff;
+      --text: #1a1a2e;
+      --text-muted: #6b7280;
+      --border: #e5e7eb;
+      --mac: #555;
+      --win: #0078d4;
+      --shadow: 0 4px 24px rgba(0,0,0,0.08);
+      --radius: 16px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', 'Hiragino Sans', 'Meiryo', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ====== HEADER ====== */
+    header {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      color: white;
+      padding: 24px 32px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.3);
+    }
+    header .logo {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -1px;
+    }
+    header .logo span { color: #e2231a; }
+    header .subtitle {
+      font-size: 13px;
+      opacity: 0.7;
+      margin-top: 2px;
+    }
+
+    /* ====== BREADCRUMB ====== */
+    #breadcrumb {
+      background: white;
+      border-bottom: 1px solid var(--border);
+      padding: 10px 32px;
+      font-size: 13px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      min-height: 40px;
+    }
+    .bc-item { cursor: pointer; color: var(--secondary); }
+    .bc-item:hover { text-decoration: underline; }
+    .bc-sep { color: #ccc; }
+    .bc-current { color: var(--text-muted); }
+
+    /* ====== PROGRESS BAR ====== */
+    #progress-bar-wrap {
+      background: white;
+      border-bottom: 1px solid var(--border);
+      padding: 0 32px 12px;
+      display: none;
+    }
+    #progress-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+    #progress-bar-bg {
+      height: 6px;
+      background: var(--border);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+    #progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      border-radius: 99px;
+      transition: width 0.4s ease;
+    }
+
+    /* ====== MAIN ====== */
+    main {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 40px 24px;
+    }
+
+    /* ====== PAGE ====== */
+    .page { display: none; animation: fadeIn 0.3s ease; }
+    .page.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* ====== CARD ====== */
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 36px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      margin-bottom: 24px;
+    }
+
+    .page-number {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+    h1 {
+      font-size: 26px;
+      font-weight: 800;
+      margin-bottom: 8px;
+      line-height: 1.3;
+    }
+    h2 {
+      font-size: 19px;
+      font-weight: 700;
+      margin: 28px 0 12px;
+    }
+    h3 {
+      font-size: 15px;
+      font-weight: 700;
+      margin: 20px 0 8px;
+    }
+    .lead {
+      font-size: 16px;
+      color: var(--text-muted);
+      margin-bottom: 28px;
+      line-height: 1.7;
+    }
+    p { margin-bottom: 12px; line-height: 1.75; font-size: 15px; }
+
+    /* ====== YES/NO BUTTONS ====== */
+    .yn-group {
+      display: flex;
+      gap: 16px;
+      margin: 28px 0;
+      flex-wrap: wrap;
+    }
+    .btn-yn {
+      flex: 1;
+      min-width: 180px;
+      padding: 20px 28px;
+      border-radius: 12px;
+      border: 2px solid transparent;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 700;
+      text-align: center;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    .btn-yes {
+      background: #e8f9f1;
+      border-color: var(--accent);
+      color: var(--accent-dark);
+    }
+    .btn-yes:hover { background: var(--accent); color: white; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,176,107,0.3); }
+    .btn-no {
+      background: #fff2f2;
+      border-color: var(--primary);
+      color: var(--primary-dark);
+    }
+    .btn-no:hover { background: var(--primary); color: white; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(226,35,26,0.3); }
+
+    /* ====== ROLE BUTTONS ====== */
+    .role-group {
+      display: flex;
+      gap: 20px;
+      margin: 32px 0;
+      flex-wrap: wrap;
+    }
+    .btn-role {
+      flex: 1;
+      min-width: 200px;
+      padding: 28px 24px;
+      border-radius: 16px;
+      border: 2px solid var(--border);
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.25s ease;
+      background: white;
+    }
+    .btn-role .icon { font-size: 42px; margin-bottom: 12px; }
+    .btn-role .role-title { font-size: 17px; font-weight: 800; margin-bottom: 6px; }
+    .btn-role .role-desc { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+    .btn-role-scripter:hover { border-color: var(--secondary); background: #f0f6ff; box-shadow: 0 6px 24px rgba(0,102,204,0.15); transform: translateY(-3px); }
+    .btn-role-asset:hover { border-color: var(--accent); background: #f0faf6; box-shadow: 0 6px 24px rgba(0,176,107,0.15); transform: translateY(-3px); }
+
+    /* ====== NEXT BUTTON ====== */
+    .btn-next {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 28px;
+      background: linear-gradient(135deg, var(--secondary), #004ea6);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 8px;
+    }
+    .btn-next:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,102,204,0.35); }
+
+    .btn-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 18px;
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-right: 12px;
+    }
+    .btn-back:hover { background: var(--bg); color: var(--text); }
+
+    /* ====== OS TAB ====== */
+    .os-tabs {
+      display: flex;
+      gap: 0;
+      margin: 20px 0 0;
+      border-bottom: 2px solid var(--border);
+    }
+    .os-tab {
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      transition: all 0.2s;
+    }
+    .os-tab.mac.active { color: var(--mac); border-bottom-color: var(--mac); }
+    .os-tab.win.active { color: var(--win); border-bottom-color: var(--win); }
+    .os-tab:hover { color: var(--text); }
+    .os-content { display: none; padding: 20px 0; }
+    .os-content.active { display: block; }
+
+    /* ====== CODE BLOCK ====== */
+    .code-block {
+      background: #1e1e2e;
+      color: #cdd6f4;
+      border-radius: 10px;
+      padding: 18px 20px;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 14px;
+      margin: 12px 0 18px;
+      overflow-x: auto;
+      line-height: 1.7;
+      position: relative;
+    }
+    .code-block .cmd { color: #89dceb; }
+    .code-block .comment { color: #6c7086; font-style: italic; }
+
+    /* ====== INFO BOX ====== */
+    .info-box {
+      border-left: 4px solid var(--secondary);
+      background: #f0f6ff;
+      padding: 14px 18px;
+      border-radius: 0 10px 10px 0;
+      margin: 16px 0;
+      font-size: 14px;
+      line-height: 1.65;
+    }
+    .info-box.warn {
+      border-left-color: #f59e0b;
+      background: #fffbeb;
+    }
+    .info-box.success {
+      border-left-color: var(--accent);
+      background: #f0faf6;
+    }
+    .info-box.tip {
+      border-left-color: #8b5cf6;
+      background: #f5f3ff;
+    }
+    .info-box strong { display: block; margin-bottom: 4px; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.7; }
+
+    /* ====== STEP LIST ====== */
+    .steps { list-style: none; margin: 16px 0; }
+    .steps li {
+      display: flex;
+      gap: 14px;
+      margin-bottom: 16px;
+      align-items: flex-start;
+    }
+    .step-num {
+      flex-shrink: 0;
+      width: 28px;
+      height: 28px;
+      background: var(--secondary);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      margin-top: 1px;
+    }
+    .step-body { flex: 1; font-size: 15px; line-height: 1.7; }
+    .step-body img { max-width: 100%; border-radius: 8px; margin: 8px 0; border: 1px solid var(--border); }
+
+    /* ====== TAG ====== */
+    .tag {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 99px;
+      font-size: 12px;
+      font-weight: 700;
+      margin-right: 6px;
+    }
+    .tag-mac { background: #f0f0f0; color: #333; }
+    .tag-win { background: #e8f0fb; color: #0078d4; }
+    .tag-rojo { background: #fde8e8; color: #c0392b; }
+    .tag-git { background: #fff3e8; color: #d35400; }
+    .tag-vscode { background: #e8f3ff; color: #005fb8; }
+
+    /* ====== COMPLETION ====== */
+    .completion-box {
+      text-align: center;
+      padding: 40px 24px;
+    }
+    .completion-icon { font-size: 64px; margin-bottom: 16px; }
+    .completion-title { font-size: 24px; font-weight: 800; margin-bottom: 10px; }
+    .completion-desc { color: var(--text-muted); font-size: 15px; line-height: 1.7; }
+
+    /* ====== DIVIDER ====== */
+    hr { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
+
+    /* ====== KEYBOARD ====== */
+    kbd {
+      display: inline-block;
+      padding: 2px 8px;
+      background: #f3f4f6;
+      border: 1px solid #d1d5db;
+      border-bottom: 3px solid #9ca3af;
+      border-radius: 5px;
+      font-family: monospace;
+      font-size: 13px;
+      color: #374151;
+    }
+
+    /* ====== HIGHLIGHT ====== */
+    .hl { background: #fef9c3; padding: 1px 4px; border-radius: 4px; }
+
+    /* ====== RESPONSIVE ====== */
+    @media (max-width: 600px) {
+      header { padding: 18px 20px; }
+      main { padding: 24px 16px; }
+      .card { padding: 24px 20px; }
+      .yn-group { flex-direction: column; }
+      .role-group { flex-direction: column; }
+      h1 { font-size: 22px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="logo"><span>R</span>oblox × Rojo × GitHub</div>
+    <div class="subtitle">VR-SKATE ／ チームメンバー向けセットアップマニュアル</div>
+  </div>
+</header>
+
+<div id="breadcrumb"></div>
+<div id="progress-bar-wrap">
+  <div id="progress-label"></div>
+  <div id="progress-bar-bg"><div id="progress-bar-fill" style="width:0%"></div></div>
+</div>
+
+<main>
+
+<!-- ===================== PAGE: START ===================== -->
+<div class="page active" id="page-start" data-title="スタート">
+  <div class="card">
+    <div class="page-number">ようこそ</div>
+    <h1>👋 Roblox × Rojo × GitHub<br>セットアップマニュアル</h1>
+    <p class="lead">このマニュアルでは、あなたの役割と状況に合わせてステップバイステップでセットアップを進めます。まず、あなたの主な役割を教えてください。</p>
+    <div class="role-group">
+      <div class="btn-role btn-role-scripter" onclick="goTo('page-s-github')">
+        <div class="icon">💻</div>
+        <div class="role-title">スクリプター</div>
+        <div class="role-desc">Luaスクリプトを書く・<br>コードを管理したい</div>
+      </div>
+      <div class="btn-role btn-role-asset" onclick="goTo('page-a-intro')">
+        <div class="icon">🎨</div>
+        <div class="role-title">アセット制作者</div>
+        <div class="role-desc">モデル・テクスチャ・<br>UIなどを制作する<br><small style="color:#888;font-size:11px">※GitHubは使用しません</small></div>
+      </div>
+    </div>
+    <div class="info-box tip">
+      <strong>💡 ヒント</strong>
+      両方やっている方は「スクリプター」を選んでください。アセット管理の説明も含まれています。
+    </div>
+  </div>
+</div>
+
+<!-- ===================== SCRIPTER FLOW ===================== -->
+
+<!-- S-1: GitHub アカウント確認 -->
+<div class="page" id="page-s-github" data-title="GitHubアカウント確認" data-progress="10">
+  <div class="card">
+    <div class="page-number">スクリプター向け ステップ 1</div>
+    <h1>📋 GitHubアカウントはありますか？</h1>
+    <p class="lead">Roblox + Rojoのコード管理にはGitHubを使います。すでにアカウントをお持ちですか？</p>
+    <div class="yn-group">
+      <button class="btn-yn btn-yes" onclick="goTo('page-s-org-invite')">✅ はい、持っています</button>
+      <button class="btn-yn btn-no" onclick="goTo('page-s-create-github')">❌ いいえ、持っていません</button>
+    </div>
+    <div class="info-box">
+      <strong>ℹ️ GitHubとは</strong>
+      コードをクラウド上で管理・共有するサービスです。チームでの共同作業に欠かせません。無料で使えます。
+    </div>
+  </div>
+  <div style="margin-top:8px"><button class="btn-back" onclick="goTo('page-start')">← 最初に戻る</button></div>
+</div>
+
+<!-- S-2: GitHub アカウント作成 -->
+<div class="page" id="page-s-create-github" data-title="GitHubアカウント作成" data-progress="15">
+  <div class="card">
+    <div class="page-number">スクリプター向け ステップ 1-a</div>
+    <h1>🔐 GitHubアカウントを作成する</h1>
+    <p class="lead">以下の手順でGitHubアカウントを作成してください。</p>
+    <ul class="steps">
+      <li>
+        <div class="step-num">1</div>
+        <div class="step-body">ブラウザで <strong><a href="https://github.com" target="_blank">https://github.com</a></strong> を開く</div>
+      </li>
+      <li>
+        <div class="step-num">2</div>
+        <div class="step-body">右上の <span class="hl">Sign up</span> をクリック</div>
+      </li>
+      <li>
+        <div class="step-num">3</div>
+        <div class="step-body"><strong>メールアドレス</strong>を入力 → <strong>パスワード</strong>を設定 → <strong>ユーザー名</strong>（英数字）を決める</div>
+      </li>
+      <li>
+        <div class="step-num">4</div>
+        <div class="step-body">確認メールが届くので、メール内のリンクをクリックして認証を完了する</div>
+      </li>
+      <li>
+        <div class="step-num">5</div>
+        <div class="step-body">ログインできたら完了！<strong>自分のユーザー名を管理者に伝えてください</strong>（Organization招待に必要）</div>
+      </li>
+    </ul>
+    <div class="info-box warn">
+      <strong>⚠️ ユーザー名について</strong>
+      URLに表示されます（例: github.com/yourname）。チームに見せても問題ないものを選びましょう。
+    </div>
+    <button class="btn-next" onclick="goTo('page-s-org-invite')">アカウント作成完了 → 次へ ›</button>
+  </div>
+  <div style="margin-top:8px"><button class="btn-back" onclick="goTo('page-s-github')">← 前に戻る</button></div>
+</div>
+
+<!-- S-3: Organization 招待確認 -->
+<div class="page" id="page-s-org-invite" data-title="Organization招待" data-progress="20">
+  <div class="card">
+    <div class="page-number">スクリプター向け ステップ 2</div>
+    <h1>🏢 Organization（組織）の招待を<br>受け取りましたか？</h1>
+    <p class="lead">管理者からGitHub Organizationへの招待メールが届いているはずです。確認してみてください。</p>
+    <div class="yn-group">
+      <button class="btn-yn btn-yes" onclick="goTo('page-s-accept-org')">✅ 招待メールが届いている</button>
+      <button class="btn-yn btn-no" onclick="goTo('page-s-wait-org')">❌ まだ届いていない</button>
+    </div>
+  </div>
+  <div style="margin-top:8px"><button class="btn-back" onclick="goTo('page-s-github')">← 前に戻る</button></div>
+</div>
+
+<!-- S-3b: 招待待ち -->
+<div class="page" id="page-s-wait-org" data-title="招待待ち" data-progress="20">
+  <div class="card">
+    <div class="page-number">スクリプター向け ステップ 2-a</div>
+    <h1>⏳ 管理者に連絡してください</h1>
+    <p class="lead">招待はプロジェクトの管理者が行います。以下を確認・連絡してください。</p>
+    <ul class="steps">
+      <li>
+        <div class="step-num">1</div>
+        <div class="step-body">自分の <strong>GitHubユーザー名</strong> を管理者に伝えているか確認する</div>
+      </li>
+      <li>
+        <div class="step-num">2</div>
+        <div class="step-body">管理者に招待を依頼する（DM・Discordなどで連絡）</div>
+      </li>
+      <li>
+        <div class="step-num">3</div>
+        <div class="step-body">招待後、登録メールアドレスに通知が来るか、<strong>github.com にログインして通知（🔔）を確認</strong>する</div>
+      </li>
+    </ul>
+    <div class="info-box">
+      <strong>ℹ️ 補足</strong>
+      GitHubにログイン後、画面右上のベルアイコン🔔から招待を確認できます。
+    </div>
+    <button class="btn-next" onclick="goTo('page-s-accept-org')">招待が届いた → 次へ ›</button>
+  </div>
+  <div style="margin-top:8px"><button class="btn-back" onclick="goTo('page-s-org-invite')">← 前に戻る</button></div>
+</div>
+
+<!-- S-4: Organization 参加 -->
+<div class="page" id="page-s-accept-org" data-title="Organization参加手順" data-progress="28">
+  <div class="card">
+    <div class="page-number">スクリプター向け ステップ 2-b</div>
+    <h1>✉️ Organization招待を承認する</h1>
+    <ul class="steps">
+      <li>
+        <div class="step-num">1</div>
+        <div class="step-body">招待メールを開き、<span class="hl">Join [Organization名]</span> ボタンをクリック<br><em>または</em> GitHubにログインして右上の🔔通知から確認</div>
+      </li>
+      <li>
+        <div class="step-num">2</div>
+        <div class="step-body">確認画面で <span class="hl">Join Organization</span> をクリック</div>
+      </li>
+      <li>
+        <div class="step-num">3</div>
+        <div class="step-body">github.com/[Organization名] でメンバー欄に自分が表示されていれば参加完了！</div>
+      </li>
+    </ul>
+    <div class="info-box success">
+      <strong>✅ 参加完了の確認</strong>
+      自分のGitHubプロフィールページ（github.com/自分のユーザー名）を開いて、OrganizationのアイコンがOverviewに表示されていればOKです。
+    </div>
+    <button class="btn-next" onclick="goTo('page-s-vscode')">次のステップへ ›</button>
+  </div>
+  <div style="margin-top:8px"><button class="btn-back" onclick="goTo('page-s-org-invite')">← 前に戻る</button></div>
+</div>
+
+<!-- S-5: VS Code 確認 -->
+<div class="page" id="page-s-vscode" data-title="VS Codeインストール確認" data-progress="38">
+  <div class="card">
+    <div class="page-number">スクリプター向け ステップ 3</div>
+    <h1>🖊️ VS Code（Visual Studio Code）は<br>インストール済みですか？</h1>
+    <p class="lead">コードエディターとして VS Code を使用します。</p>
+    <div class="yn-group">
+      <button class="btn-yn btn-yes" onclick="goTo('page-s-git')">✅ はい、入っています</button>
+      <button class="btn-yn btn-no" onclick="goTo('page-s-install-vscode')">❌ いいえ、入っていません</button>
+    </div>
+  </div>
+  <div style="margin-top:8px"><button class="btn-back" onclick="goTo('page-s-accept-org')">← 前に戻る</button></div>
+</div>
+
+<!-- S-5b: VS Code インストール -->
+<div class="page" id="page-s-install-vscode" data-title="VS Codeインストール" data-progress="42">
+  <div class="card">
+    <div class="page-number">スクリプター向け ステップ 3-a</div>
+    <h1>💿 VS Codeをインストールする</h1>
+
+    <div class="os-tabs">
+      <button class="os-tab mac active" onclick="switchOS(this, 'vscode-mac')">🍎 Mac</button>
+      <button class="os-tab win" onclick="switchOS(this, 'vscode-win')">🪟 Windows</button>
+    </div>
+
+    <div class="os-content active" id="vscode-mac">
+      <ul class="steps">
+        <li><div class="step-num">1</div><div class="step-body"><a href="https://code.visualstudio.com/download" target="_blank">https://code.visualstudio.com/download</a> を開く</div></li>
+        <li><div class="step-num">2</div><div class="step-body"><span class="tag tag-mac">Mac</span> の <span class="hl">.dmg</span> をダウンロード（Apple Silicon / Intel を確認）</div></li>
+        <li><div class="step-num">3</div><div class="step-body">ダウンロードした <code>.dmg</code> ファイルを開き、VS Codeのアイコンを <span class="hl">Applications</span> フォルダにドラッグ</div></li>
+        <li><div class="step-num">4</div><div class="step-body">Launchpadまたはアプリケーションフォルダから <strong>Visual Studio Code</strong> を起動</div></li>
+        <li><div class="step-num">5</div><div class="step-body">
+          コマンドパレットから <span class="hl">code</span> コマンドをパスに追加する（推奨）：<br>
+          <kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd> → <code>Shell Command: Install 'code' command in PATH</code> を実行
+        </div></li>
+      </ul>
+    </div>
+
+    <div class="os-content" id="vscode-win">
+      <ul class="steps">
+        <li><div class="step-num">1</div><div class="step-body"><a href="https://code.visualstudio.com/download" target="_blank">https://code.visualstudio.com/download</a> を開く</div></li>
+        <li><div class="step-num">2</div><div class="step-body"><span class="tag tag-win">Windows</span> の <span class="hl">.exe</span> をダウンロード</div></li>
+        <li><div class="step-num">3</div><div class="step-body">ダウンロードした <code>.exe</code> を実行し、インストーラーの指示に従う</div></li>
+        <li><div class="step-num">4</div><div class="step-body">インストール時に <span class="hl">「PATHへの追加」にチェックを入れる</span>（デフォルトでONになっています）</div></li>
+        <li><div class="step-num">5</div><div class="step-body">スタートメニューから <strong>Visual Studio Code</strong> を起動して完了</div></li>
+      </ul>
+    </div>
+
+    <button class="btn-next" onclick="goTo('page-s-git')">インストール完了 → 次へ ›</button>
+  </div>
+  <div style="margin-top:8px"><button class="btn-back" onclick="goTo('page-s-vscode')">← 前に戻る</button></div>
+</div>
+
+<!-- S-6: Git 確認 -->
+<div class="page" id="page-s-git" data-title="Gitインストール確認" data-progress="50">
+  <div class="card">
+    <div class="page-number">スクリプター向け ステップ 4</div>
+    <h1>🔧 Gitはインストール済みですか？</h1>
+    <p class="lead">GitはGitHubを使うために必要なツールです。VS Codeのターミナルで確認できます。</p>
+    <h2>確認方法</h2>
+    <p>VS Codeを開いて、<kbd>Ctrl</kbd>+<kbd>`</kbd>（Macは<kbd>Cmd</kbd>+<kbd>`</kbd>）でターミナルを開き、以下を入力してください：</p>
+    <div class="code-block"><span class="cmd">git --version</span></div>
+    <p><code>git version 2.x.x</code> のように表示されれば✅ インストール済みです。<br><code>command not found</code> などのエラーが出た場合は❌ 未インストールです。</p>
+    <div class="yn-group">
+      <button class="btn-yn btn-yes" onclick="goTo('page-s-rojo')">✅ バージョンが表示された</button>
+      <button class="btn-yn btn-no" onclick="goTo('page-s-install-git')">❌ エラーが出た / わからない</button>
+    </div>
+  </div>
+  <div style="margin-top:8px"><button class="btn-back" onclick="goTo('page-s-vscode')">← 前に戻る</button></div>
+</div>
+
+<!-- S-6b: Git インストール -->
+<div class="page" id="page-s-install-git" data-title="Gitインストール" data-progress="54">
+  <div class="card">
+    <div class="page-number">スクリプター向け ステップ 4-a</div>
+    <h1>⚙️ Gitをインストールする</h1>
+
+    <div class="os-tabs">
+      <button class="os-tab mac active" onclick="switchOS(this, 'git-mac')">🍎 Mac</button>
+      <button class="os-tab win" onclick="switchOS(this, 'git-win')">🪟 Windows</button>
+    </div>
+
+    <div class="os-content active" id="git-mac">
+      <p>Macには最初からGitが含まれている場合があります。ターミナルで以下を実行：</p>
+      <div class="code-block"><span class="cmd">xcode-select --install</span></div>
+      <p>ポップアップが出たら「インストール」をクリック。これでGitが入ります。<br>または <a href="https://git-scm.com/download/mac" target="_blank">https://git-scm.com/download/mac</a> からもインストールできます。</p>
+      <div class="info-box">
+        <strong>💡 Homebrewをお持ちの方</strong>
+        <code>brew install git</code> でも可能です。
+      </div>
+    </div>
+
+    <div class="os-content" id="git-win">
+      <ul class="steps">
+        <li><div class="step-num">1</div><div class="step-body"><a href="https://git-scm.com/download/win" target="_blank">https://git-scm.com/download/win</a> を開く</div></li>
+        <li><div class="step-num">2</div><div class="step-body"><span class="hl">64-bit Git for Windows Setup</span> をダウンロード</div></li>
+        <li><div class="step-num">3</div><div class="step-body">インストーラーを実行。オプションはすべてデフォルトのままでOK</div></li>
+        <li><div class="step-num">4</div><div class="step-body">VS Codeを一度閉じて再起動し、ターミナルで <code>git --version</code> を確認</div></li>
+      </ul>
+      <div class="info-box warn">
+        <strong>⚠️ Git for Windowsについて</strong>
+        インストール時に「Git Bash」「Git GUI」なども一緒に入りますが、VS Codeのターミナルから使うので特に必要ありません。
+      </div>
+    </div>
+
+    <button class="btn-next" onclick="goTo('page-s-rojo')">インストール完了 → 次へ ›</button>
+  </div>
+  <div style="margin-top:8px"><button class="btn-back" onclick="goTo('page-s-git')">← 前に戻る</button></div>
+</div>
+
+<!-- S-7: Rojo 確認 -->
+<div class="page" id="page-s-rojo" data-title="Rojoインストール確認" data-progress="64">
+  <div class="card">
+    <div class="page-number">スクリプター向け ステップ 5</div>
+    <h1>🔴 Rojoはインストール済みですか？</h1>
+    <p class="lead">RojoはRoblox Studioと外部エディター（VS Code）を繋ぐツールです。ターミナルで確認してみましょう。</p>
+    <div class="info-box tip">
+      <strong>💡 「Rojo」って何？</strong>
+      通常、Robloxのスクリプトは Studio 上でしか編集できません。Rojoを使うと、VS Code で編集したファイルをリアルタイムで Studio に同期させることができます。これにより、GitでコードをチームBで管理しながらStudioで動作確認するという開発スタイルが実現します。
+    </div>
+    <div class="code-block"><span class="cmd">rojo --version</span></div>
+    <div class="yn-group">
+      <button class="btn-yn btn-yes" onclick="goTo('page-s-clone')">✅ バージョンが表示された</button>
+      <button class="btn-yn btn-no" onclick="goTo('page-s-install-rojo')">❌ インストールしていない</button>
+    </div>
+    <div class="info-box">
+      <strong>ℹ️ Rojoとは</strong>
+      ファイルシステム上のLuaスクリプトをRoblox Studioに自動同期してくれるツール。VS Codeで編集した内容がリアルタイムでStudioに反映されます。
+    </div>
+  </div>
+  <div style="margin-top:8px"><button class="btn-back" onclick="goTo('page-s-git')">← 前に戻る</button></div>
+</div>
+
+<!-- S-7b: Rojo インストール -->
+<div class="page" id="page-s-install-rojo" data-title="Rojoインストール" data-progress="68">
+  <div class="card">
+    <div class="page-number">スクリプター向け ステップ 5-a</div>
+    <h1>🔴 Rojoをインストールする</h1>
+    <p>Rojoのインストールには <strong>Aftman</strong>（ツールバージョンマネージャー）を使う方法が推奨です。</p>
+
+    <h2>① Aftmanをインストールする</h2>
+
+    <div class="os-tabs">
+      <button class="os-tab mac active" onclick="switchOS(this, 'rojo-mac')">🍎 Mac</button>
+      <button class="os-tab win" onclick="switchOS(this, 'rojo-win')">🪟 Windows</button>
+    </div>
+
+    <div class="os-content active" id="rojo-mac">
+      <p><a href="https://github.com/LPGhatguy/aftman/releases" target="_blank">Aftman Releases</a> から最新の <code>aftman-macos.zip</code> をダウンロードして解凍し、ターミナルで：</p>
+      <div class="code-block"><span class="cmd">./aftman self-install</span></div>
+      <p>その後、新しいターミナルセッションを開くか以下を実行：</p>
+      <div class="code-block"><span class="cmd">source ~/.zshrc</span><br><span class="comment"># または ~/.bash_profile</span></div>
+    </div>
+
+    <div class="os-content" id="rojo-win">
+      <p><a href="https://github.com/LPGhatguy/aftman/releases" target="_blank">Aftman Releases</a> から最新の <code>aftman-windows.zip</code> をダウンロードして解凍。展開先のフォルダでPowerShellを開き：</p>
+      <div class="code-block"><span class="cmd">.\aftman self-install</span></div>
+      <p>完了後、VS Codeを再起動してターミナルをリフレッシュ。</p>
+    </div>
+
+    <h2>② Rojoをインストールする</h2>
+    <p>プロジェクトフォルダ（後でクローンするリポジトリ）に <code>aftman.toml</code> があれば：</p>
+    <div class="code-block"><span class="cmd">aftman install</span></div>
+    <p>なければ直接インストール：</p>
+    <div class="code-block"><span class="cmd">aftman add rojo-rbx/rojo</span></div>
+
+    <div class="info-box warn">
+      <strong>⚠️ 別の方法：Ropeのダイレクトインストール</strong>
+      プロジェクトで指定のバージョンを使う場合は管理者の指示に従ってください。
+    </div>
+
+    <button class="btn-next" onclick="goTo('page-s-clone')">インストール完了 → 次へ ›</button>
+  </div>
+  <div style="margin-top:8px"><button class="btn-back" onclick="goTo('page-s-rojo')">← 前に戻る</button></div>
+</div>
+
+<!-- S-8: リポジトリのクローン -->
+<div class="page" id="page-s-clone" data-title="リポジトリをクローン" data-progress="76">
+  <div class="card">
+    <div class="page-number">スクリプター向け ステップ 6</div>
+    <h1>📦 リポジトリをクローンする</h1>
+    <p class="lead">GitHubのプロジェクトファイル一式をあなたのPC上にコピーします。</p>
+
+    <div class="info-box tip">
+      <strong>💡 「リポジトリ」って何？</strong>
+      プロジェクトのファイルや変更履歴をまるごと保存しているフォルダのことです。GitHubの上にある「オンライン版」と、自分のPC上にある「ローカル版」の2つが存在します。「クローン」とは、オンライン版をそのままPC上にコピーしてくる作業のことです。
+    </div>
+
+    <h2>① リポジトリURLを取得する</h2>
+    <ul class="steps">
+      <li>
+        <div class="step-num">1</div>
+        <div class="step-body">
+          ブラウザで <a href="https://github.com" target="_blank">https://github.com</a> を開いてログインする
+        </div>
+      </li>
+      <li>
+        <div class="step-num">2</div>
+        <div class="step-body">
+          画面左上のアイコンをクリック → <span class="hl">Your organizations</span> を選択 → <strong>VR-SKATE</strong> をクリック
+        </div>
+      </li>
+      <li>
+        <div class="step-num">3</div>
+        <div class="step-body">
+          ページ上部の <span class="hl">Repositories</span> タブをクリックし、管理者から指定されたリポジトリ名をクリック
+        </div>
+      </li>
+      <li>
+        <div class="step-num">4</div>
+        <div class="step-body">
+          リポジトリのトップページが開いたら、緑色の <span class="hl">&lt;&gt; Code</span> ボタンをクリック
+        </div>
+      </li>
+      <li>
+        <div class="step-num">5</div>
+        <div class="step-body">
+          <span class="hl">HTTPS</span> タブを選択し、表示されたURL（例: <code>https://github.com/VR-SKATE/repo.git</code>）右横のコピーボタンをクリック
+        </div>
+      </li>
+    </ul>
+
+    <h2>② VS Codeのターミナルでクローンする</h2>
+    <p>VS Codeを起動し、<kbd>Ctrl</kbd>+<kbd>`</kbd>（Mac: <kbd>Cmd</kbd>+<kbd>`</kbd>）でターミナルを開く。</p>
+    <p>クローン先のフォルダに移動してから：</p>
+    <div class="code-block">
+      <span class="comment"># 例: デスクトップに移動する場合</span><br>
+      <span class="cmd">cd ~/Desktop</span><br><br>
+      <span class="comment"># リポジトリをクローン（URLは自分のものに変更）</span><br>
+      <span class="cmd">git clone https://github.com/OrgName/repo.git</span>
+    </div>
+    <div class="info-box">
+      <strong>ℹ️ URLの "repo" について</strong>
+      <code>repo</code> の部分はリポジトリ名です。GitHubのリポジトリページで確認できます。クローン後、同じ名前のフォルダがPC上に作成されます。
+    </div>
+
+    <h2>③ フォルダをVS Codeで開く</h2>
+    <div class="code-block">
+      <span class="comment"># "repo" の部分は実際のリポジトリ名に変更する</span><br>
+      <span class="cmd">cd repo</span><br>
+      <span class="cmd">code .</span>
+    </div>
+    <p>または VS Code のメニュー → <span class="hl">File → Open Folder</span> でクローンしたフォルダを選択。</p>
+
+    <div class="info-box success">
+      <strong>✅ 完了の確認</strong>
+      VS Codeの左サイドバーにプロジェクトのファイル一覧が表示されていればOKです。
+    </div>
+
+    <button class="btn-next" onclick="goTo('page-s-rojo-plugin')">次のステップへ ›</button>
+  </div>
+  <div style="margin-top:8px"><button class="btn-back" onclick="goTo('page-s-rojo')">← 前に戻る</button></div>
+</div>
+
+<!-- S-9: Rojo Studio Plugin -->
+<div class="page" id="page-s-rojo-plugin" data-title="RojoプラグインをStudioに入れる" data-progress="84">
+  <div class="card">
+    <div class="page-number">スクリプター向け ステップ 7</div>
+    <h1>🔌 Roblox StudioにRojoプラグインを入れる</h1>
+    <p class="lead">VS Code側のRojoとRoblox Studioを繋げるために、Studio用プラグインが必要です。</p>
+
+    <ul class="steps">
+      <li>
+        <div class="step-num">1</div>
+        <div class="step-body">Roblox Studioを起動する</div>
+      </li>
+      <li>
+        <div class="step-num">2</div>
+        <div class="step-body">上部メニューの <span class="hl">Plugins</span> → <span class="hl">Plugin Manager</span> を開く<br><em>または</em> <a href="https://www.roblox.com/library/13916111004/Rojo" target="_blank">RojoのRobloxプラグインページ</a> から「Get」でインストール</div>
+      </li>
+      <li>
+        <div class="step-num">3</div>
+        <div class="step-body">インストール後、Studioのプラグインバーに <strong>Rojo</strong> アイコンが表示されます</div>
+      </li>
+    </ul>
+
+    <div class="info-box">
+      <strong>ℹ️ 既にプラグインが入っている場合</strong>
+      このステップはスキップ可能です。プラグインバーにRojoのアイコンがあればOK。
+    </div>
+
+    <button class="btn-next" onclick="goTo('page-s-start-rojo')">次のステップへ ›</button>
+  </div>
+  <div style="margin-top:8px"><button class="btn-back" onclick="goTo('page-s-clone')">← 前に戻る</button></div>
+</div>
+
+<!-- S-10: Rojoサーバー起動・接続 -->
+<div class="page" id="page-s-start-rojo" data-title="Rojo起動＆Studio接続" data-progress="92">
+  <div class="card">
+    <div class="page-number">スクリプター向け ステップ 8</div>
+    <h1>🚀 Rojoサーバーを起動して<br>Roblox Studioに接続する</h1>
+
+    <h2>① VS Codeのターミナルでサーバーを起動</h2>
+    <p>VS Codeのターミナルで、プロジェクトのルートフォルダに移動してから：</p>
+    <div class="code-block"><span class="cmd">rojo serve</span></div>
+    <p><code>Serving on port 34872</code> のようなメッセージが出ればサーバーが起動しています。</p>
+
+    <div class="info-box tip">
+      <strong>💡 プロジェクトファイルについて</strong>
+      プロジェクトに <code>default.project.json</code> がある場合はそのまま <code>rojo serve</code> でOK。<br>
+      別名のファイルを使う場合: <code>rojo serve myproject.project.json</code>
+    </div>
+
+    <h2>② Roblox Studioから接続する</h2>
+    <ul class="steps">
+      <li><div class="step-num">1</div><div class="step-body">Roblox Studioを開き（Playtest用のPlaceファイルを開く）</div></li>
+      <li><div class="step-num">2</div><div class="step-body">プラグインバーの <span class="hl">Rojo</span> アイコンをクリック</div></li>
+      <li><div class="step-num">3</div><div class="step-body"><span class="hl">Connect</span> ボタンをクリック → サーバーに接続される</div></li>
+      <li><div class="step-num">4</div><div class="step-body">VS Codeでスクリプトを編集すると、Studioにリアルタイムで反映されます 🎉</div></li>
+    </ul>
+
+    <button class="btn-next" onclick="goTo('page-s-workflow')">最終ステップへ ›</button>
+  </div>
+  <div style="margin-top:8px"><button class="btn-back" onclick="goTo('page-s-rojo-plugin')">← 前に戻る</button></div>
+</div>
+
+<!-- S-11: 日常ワークフロー -->
+<div class="page" id="page-s-workflow" data-title="日常のGitワークフロー" data-progress="100">
+  <div class="card">
+    <div class="page-number">スクリプター向け ステップ 9</div>
+    <h1>🔄 日常の作業フロー</h1>
+    <p class="lead">セットアップ完了後の基本的なGitワークフローです。毎回の作業でこの流れを繰り返します。</p>
+
+    <div class="info-box tip">
+      <strong>💡 「ブランチ」って何？</strong>
+      ブランチとは、プロジェクトのコードを「コピーして別の場所で作業する」イメージです。<br>
+      みんなが共有している <code>main</code>（本番コード）を直接触らず、自分専用の作業スペース（ブランチ）を作ってそこで編集します。作業が完成したら、レビューを経て <code>main</code> に反映します。<br><br>
+      こうすることで、未完成のコードが本番に混入したり、他のメンバーの作業を上書きしてしまうリスクを防げます。
+    </div>
+    <div class="info-box">
+      <strong>ℹ️ ブランチ運用の流れ</strong>
+      <code>main</code> ブランチは常に安定した状態を保ちます。作業は必ず自分のブランチで行い、完成したらPull Request（PR）を作成してレビュー後にmainへ反映します。
+    </div>
+
+    <h2>🌅 作業開始時（毎回）</h2>
+    <div class="code-block">
+      <span class="comment"># 最新のmainを取得する（必ず毎回やること！）</span><br>
+      <span class="cmd">git checkout main</span><br>
+      <span class="cmd">git pull origin main</span>
+    </div>
+
+    <h2>🌿 作業ブランチを作る</h2>
+    <div class="info-box tip">
+      <strong>💡 ブランチの名前は自由でOK</strong>
+      ブランチは作業のたびに毎回新しく作ります。名前は何でも構いませんが、後で見たときに何の作業かわかる名前にすると管理しやすいです。<br>
+      例：<code>feature/enemy-ai</code>（敵AIを追加）、<code>fix/jump-bug</code>（ジャンプのバグ修正）など<br>
+      mergeされたブランチは役目が終わります。次の作業では、また新しいブランチを作り直します。
+    </div>
+    <div class="code-block">
+      <span class="comment"># 作業内容がわかる名前でブランチを作成して移動</span><br>
+      <span class="comment"># 例: feature/enemy-ai、fix/jump-bug など</span><br>
+      <span class="cmd">git checkout -b feature/ブランチ名</span>
+    </div>
+
+    <h2>✏️ 作業中</h2>
+    <p>VS Codeでスクリプトを編集 → <code>rojo serve</code> でStudioに反映しながら作業</p>
+
+    <h2>☁️ 作業後（変更をプッシュ）</h2>
+    <div class="code-block">
+      <span class="comment"># 変更したファイルを確認</span><br>
+      <span class="cmd">git status</span><br><br>
+      <span class="comment"># 変更をステージング</span><br>
+      <span class="cmd">git add .</span><br><br>
+      <span class="comment"># コミット（変更内容を簡潔に書く）</span><br>
+      <span class="cmd">git commit -m "◯◯機能を追加"</span><br><br>
+      <span class="comment"># 自分のブランチをGitHubにプッシュ</span><br>
+      <span class="cmd">git push origin feature/ブランチ名</span>
+    </div>
+
+    <h2>🔀 Pull Request（PR）を作成する</h2>
+    <div class="info-box tip">
+      <strong>💡 「Pull Request（PR）」って何？</strong>
+      自分のブランチの変更内容を <code>main</code> に取り込んでもらうための「申請」です。GitHubのウェブ上で行い、管理者や他のメンバーがコードを確認・承認してからmainに反映されます。直接mainを書き換えるのではなく、必ずこのPRを通すことでミスや事故を防ぎます。
+    </div>
+    <ul class="steps">
+      <li>
+        <div class="step-num">1</div>
+        <div class="step-body">GitHubのリポジトリページを開く → 黄色いバナーの <span class="hl">Compare &amp; pull request</span> をクリック（またはPull requestsタブ → New pull request）</div>
+      </li>
+      <li>
+        <div class="step-num">2</div>
+        <div class="step-body">タイトルと変更内容の説明を書いて <span class="hl">Create pull request</span> をクリック</div>
+      </li>
+      <li>
+        <div class="step-num">3</div>
+        <div class="step-body">管理者またはレビュー担当者にレビューを依頼する（Discordで連絡）</div>
+      </li>
+      <li>
+        <div class="step-num">4</div>
+        <div class="step-body">承認されたら <span class="hl">Merge pull request</span> → mainに反映される 🎉</div>
+      </li>
+    </ul>
+
+    <div class="info-box warn">
+      <strong>⚠️ コンフリクトが発生したら</strong>
+      同じファイルを別のメンバーが編集していた場合、競合（コンフリクト）が起きることがあります。無理に解決しようとせず、管理者またはチームメンバーに相談してください。
+    </div>
+
+    <button class="btn-next" onclick="goTo('page-s-done')">完了！ ›</button>
+  </div>
+  <div style="margin-top:8px"><button class="btn-back" onclick="goTo('page-s-start-rojo')">← 前に戻る</button></div>
+</div>
+
+<!-- S-DONE -->
+<div class="page" id="page-s-done" data-title="セットアップ完了" data-progress="100">
+  <div class="card">
+    <div class="completion-box">
+      <div class="completion-icon">🎉</div>
+      <div class="completion-title">セットアップ完了！</div>
+      <p class="completion-desc">
+        おめでとうございます！<br>
+        Roblox × Rojo × GitHubの環境が整いました。<br><br>
+        わからないことがあればチームのDiscordで質問しましょう。
+      </p>
+    </div>
+    <hr>
+    <h2>📋 チェックリスト</h2>
+    <ul class="steps">
+      <li><div class="step-num">✅</div><div class="step-body">GitHubアカウント作成済み</div></li>
+      <li><div class="step-num">✅</div><div class="step-body">Organizationに参加済み</div></li>
+      <li><div class="step-num">✅</div><div class="step-body">VS Codeインストール済み</div></li>
+      <li><div class="step-num">✅</div><div class="step-body">Gitインストール済み</div></li>
+      <li><div class="step-num">✅</div><div class="step-body">Rojoインストール済み</div></li>
+      <li><div class="step-num">✅</div><div class="step-body">リポジトリをクローン済み</div></li>
+      <li><div class="step-num">✅</div><div class="step-body">Studio RojoプラグインをConnect済み</div></li>
+      <li><div class="step-num">✅</div><div class="step-body">ブランチを作成してPull Requestの流れを理解している</div></li>
+    </ul>
+    <div style="margin-top:24px">
+      <button class="btn-back" onclick="goTo('page-start')">← トップに戻る</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ===================== ASSET CREATOR FLOW ===================== -->
+
+<!-- A-1: アセット制作者 - イントロ -->
+<div class="page" id="page-a-intro" data-title="アセット制作者の流れ" data-progress="5">
+  <div class="card">
+    <div class="page-number">アセット制作者向け</div>
+    <h1>🎨 アセット制作者の<br>セットアップフロー</h1>
+    <p class="lead">アセット制作者はRoblox Studio上でモデル・テクスチャ・UIなどを制作します。<strong>GitHubは使用しません。</strong>Studioの機能だけで完結するワークフローを説明します。</p>
+    <div class="info-box success">
+      <strong>✅ このフローでカバーする内容</strong>
+      Roblox Studioの起動確認 → Explorerでのフォルダ整理 → ウィンドウ／アセット管理／バルクインポートでアップロード → アセット管理ウィンドウの活用
+    </div>
+    <div class="info-box">
+      <strong>ℹ️ スクリプターとの連携について</strong>
+      アセットIDをスクリプターに共有するだけでOKです。GitHubへのアクセスは不要です。
+    </div>
+    <button class="btn-next" onclick="goTo('page-a-studio-check')">始める ›</button>
+  </div>
+  <div style="margin-top:8px"><button class="btn-back" onclick="goTo('page-start')">← 最初に戻る</button></div>
+</div>
+
+<!-- A-1b: Studio確認 -->
+<div class="page" id="page-a-studio-check" data-title="Roblox Studio確認" data-progress="20">
+  <div class="card">
+    <div class="page-number">アセット制作者向け ステップ 1</div>
+    <h1>🎮 Roblox Studioはインストール済みですか？</h1>
+    <div class="yn-group">
+      <button class="btn-yn btn-yes" onclick="goTo('page-a-asset-manage')">✅ はい、起動できます</button>
+      <button class="btn-yn btn-no" onclick="goTo('page-a-install-studio')">❌ インストールしていない</button>
+    </div>
+  </div>
+  <div style="margin-top:8px"><button class="btn-back" onclick="goTo('page-a-intro')">← 前に戻る</button></div>
+</div>
+
+<!-- A-1c: Studio インストール -->
+<div class="page" id="page-a-install-studio" data-title="Roblox Studioインストール" data-progress="24">
+  <div class="card">
+    <div class="page-number">アセット制作者向け ステップ 1-a</div>
+    <h1>💿 Roblox Studioをインストールする</h1>
+    <ul class="steps">
+      <li><div class="step-num">1</div><div class="step-body"><a href="https://www.roblox.com/create" target="_blank">https://www.roblox.com/create</a> を開く</div></li>
+      <li><div class="step-num">2</div><div class="step-body"><span class="hl">Start Creating</span> ボタンをクリック → インストーラーがダウンロードされる</div></li>
+      <li><div class="step-num">3</div><div class="step-body">
+        <span class="tag tag-mac">Mac</span> ダウンロードされた <code>.dmg</code> を開き、指示に従ってインストール<br>
+        <span class="tag tag-win">Windows</span> ダウンロードされた <code>.exe</code> を実行してインストール
+      </div></li>
+      <li><div class="step-num">4</div><div class="step-body">Robloxアカウントでログインして起動確認</div></li>
+    </ul>
+    <div class="info-box warn">
+      <strong>⚠️ Robloxアカウントについて</strong>
+      Studioの使用にはRobloxアカウントが必要です。まだお持ちでない場合は <a href="https://www.roblox.com" target="_blank">roblox.com</a> で作成してください。
+    </div>
+    <button class="btn-next" onclick="goTo('page-a-asset-manage')">インストール完了 → 次へ ›</button>
+  </div>
+  <div style="margin-top:8px"><button class="btn-back" onclick="goTo('page-a-studio-check')">← 前に戻る</button></div>
+</div>
+
+<!-- A-5: Studioアセット管理 -->
+<div class="page" id="page-a-asset-manage" data-title="Studioアセット管理の基本" data-progress="40">
+  <div class="card">
+    <div class="page-number">アセット制作者向け ステップ 3</div>
+    <h1>🗂️ Roblox Studioでのアセット管理</h1>
+    <p class="lead">Roblox StudioのExplorerを使って、Scene上のオブジェクトをフォルダで整理します。</p>
+
+    <h2>Explorerでのフォルダ整理</h2>
+    <ul class="steps">
+      <li>
+        <div class="step-num">1</div>
+        <div class="step-body">Studio上部メニュー → <span class="hl">View</span> → <span class="hl">Explorer</span> を表示（ショートカット: <kbd>Alt</kbd>+<kbd>X</kbd>）</div>
+      </li>
+      <li>
+        <div class="step-num">2</div>
+        <div class="step-body">
+          整理の基本構造：
+          <div class="code-block" style="font-size:13px">
+            Workspace/<br>
+            &nbsp;&nbsp;📁 Map/           <span class="comment"># 地形・建物など</span><br>
+            &nbsp;&nbsp;📁 Props/         <span class="comment"># 小道具・アイテム</span><br>
+            ReplicatedStorage/<br>
+            &nbsp;&nbsp;📁 Assets/        <span class="comment"># 共有アセット</span><br>
+            ServerStorage/<br>
+            &nbsp;&nbsp;📁 Templates/     <span class="comment"># テンプレートモデル</span>
+          </div>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">3</div>
+        <div class="step-body">Explorerで右クリック → <span class="hl">Insert Object</span> → <span class="hl">Folder</span> でフォルダを作成</div>
+      </li>
+    </ul>
+
+    <div class="info-box tip">
+      <strong>💡 命名ルール（チームで統一推奨）</strong>
+      フォルダやモデル名はわかりやすい英語で統一すると管理しやすくなります。例: <code>NPC_Enemy_Goblin</code>
+    </div>
+
+    <button class="btn-next" onclick="goTo('page-a-upload')">次のステップへ ›</button>
+  </div>
+  <div style="margin-top:8px"><button class="btn-back" onclick="goTo('page-a-studio-check')">← 前に戻る</button></div>
+</div>
+
+<!-- A-6: アセットアップロード -->
+<div class="page" id="page-a-upload" data-title="アセットをアップロード" data-progress="60">
+  <div class="card">
+    <div class="page-number">アセット制作者向け ステップ 4</div>
+    <h1>⬆️ アセットをアップロードする</h1>
+    <p class="lead">「アセット管理」ウィンドウの <strong>バルクインポート</strong> を使って、ファイルをRobloxにアップロードします。</p>
+
+    <h2>① アセット管理ウィンドウを開く</h2>
+    <ul class="steps">
+      <li>
+        <div class="step-num">1</div>
+        <div class="step-body">Studioの上部メニュー → <span class="hl">ウィンドウ</span> → <span class="hl">アセット管理</span> をクリック</div>
+      </li>
+      <li>
+        <div class="step-num">2</div>
+        <div class="step-body">アセット管理ウィンドウが開く。カテゴリが表示される（画像・メッシュ・オーディオ・モデルなど）</div>
+      </li>
+    </ul>
+
+    <h2>② バルクインポートでアップロード</h2>
+    <ul class="steps">
+      <li>
+        <div class="step-num">1</div>
+        <div class="step-body">アセット管理ウィンドウ上部の <span class="hl">↑（アップロードボタン）</span> をクリック → バルクインポートが起動する</div>
+      </li>
+      <li>
+        <div class="step-num">2</div>
+        <div class="step-body">アップロードしたいファイルを選択（複数同時選択OK）<br>
+          <code>画像: .png / .jpg</code>　<code>メッシュ: .fbx / .obj</code>　<code>オーディオ: .mp3 / .ogg</code>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">3</div>
+        <div class="step-body"><span class="hl">開く</span> をクリックするとアップロードが始まる</div>
+      </li>
+      <li>
+        <div class="step-num">4</div>
+        <div class="step-body">アップロード完了後、対応カテゴリフォルダ（例：画像 → 「画像」フォルダ）に自動的に追加される</div>
+      </li>
+    </ul>
+
+    <div class="info-box warn">
+      <strong>⚠️ 画像のモデレーションについて</strong>
+      アップロードした画像はRobloxの審査が入ります。承認まで数分〜数時間かかる場合があり、その間は使用できません。
+    </div>
+
+    <button class="btn-next" onclick="goTo('page-a-asset-manager')">次のステップへ ›</button>
+  </div>
+  <div style="margin-top:8px"><button class="btn-back" onclick="goTo('page-a-asset-manage')">← 前に戻る</button></div>
+</div>
+
+<!-- A-7: Asset Manager -->
+<div class="page" id="page-a-asset-manager" data-title="Asset Managerの使い方" data-progress="80">
+  <div class="card">
+    <div class="page-number">アセット制作者向け ステップ 5</div>
+    <h1>📂 アセット管理ウィンドウを活用する</h1>
+    <p class="lead">アセット管理ウィンドウでは、アップロード済みのアセットの確認・整理・IDのコピーができます。</p>
+
+    <h2>アセット管理ウィンドウを開く</h2>
+    <p>Studioの上部メニュー → <span class="hl">ウィンドウ</span> → <span class="hl">アセット管理</span></p>
+
+    <h2>カテゴリフォルダの構成</h2>
+    <p>アセット管理にはアップロード済みのアセットが種類別に格納されています：</p>
+    <div class="code-block" style="font-size:13px">
+      📁 プレース<br>
+      📁 画像<br>
+      📁 メッシュ<br>
+      📁 パッケージ<br>
+      📁 オーディオ<br>
+      📁 モデル
+    </div>
+
+    <h2>主な使い方</h2>
+    <ul class="steps">
+      <li>
+        <div class="step-num">🔍</div>
+        <div class="step-body"><strong>確認</strong>：各カテゴリフォルダを開くとアップロード済みアセットが一覧表示される</div>
+      </li>
+      <li>
+        <div class="step-num">📋</div>
+        <div class="step-body"><strong>Asset IDのコピー</strong>：アセットを右クリック → <span class="hl">アセットIDをコピー</span> → スクリプターに共有できる</div>
+      </li>
+      <li>
+        <div class="step-num">📁</div>
+        <div class="step-body"><strong>フォルダで整理</strong>：カテゴリ内で右クリック → <span class="hl">フォルダの追加</span> でサブフォルダを作成できる</div>
+      </li>
+      <li>
+        <div class="step-num">⬆️</div>
+        <div class="step-body"><strong>バルクインポート</strong>：上部の <span class="hl">↑（アップロードボタン）</span> をクリックしてさらに追加できる</div>
+      </li>
+    </ul>
+
+    <div class="info-box success">
+      <strong>✅ チーム共有のポイント</strong>
+      グループのPlaceからアップロードしたアセットは、同じグループのメンバーのToolbox（グループタブ）からも利用できます。
+    </div>
+
+    <button class="btn-next" onclick="goTo('page-a-done')">完了！ ›</button>
+  </div>
+  <div style="margin-top:8px"><button class="btn-back" onclick="goTo('page-a-upload')">← 前に戻る</button></div>
+</div>
+
+<!-- A-DONE -->
+<div class="page" id="page-a-done" data-title="セットアップ完了" data-progress="100">
+  <div class="card">
+    <div class="completion-box">
+      <div class="completion-icon">🎨</div>
+      <div class="completion-title">セットアップ完了！</div>
+      <p class="completion-desc">
+        おめでとうございます！<br>
+        アセット制作者としての環境が整いました。<br><br>
+        アセットIDをスクリプターチームに共有して、チームで活用しましょう！
+      </p>
+    </div>
+    <hr>
+    <h2>📋 チェックリスト</h2>
+    <ul class="steps">
+      <li><div class="step-num">✅</div><div class="step-body">Roblox Studioがインストール・ログイン済み</div></li>
+      <li><div class="step-num">✅</div><div class="step-body">Studioでフォルダ整理ができている</div></li>
+      <li><div class="step-num">✅</div><div class="step-body">アセットをグループToolboxにアップロード済み</div></li>
+      <li><div class="step-num">✅</div><div class="step-body">Asset ManagerでAsset IDを確認・コピーできる</div></li>
+    </ul>
+    <div class="info-box tip">
+      <strong>💡 スクリプターへの共有方法</strong>
+      Asset Managerでアセットを右クリック → <span class="hl">Copy Asset ID</span> でコピーし、Discordなどのチャットでスクリプターに渡すだけでOKです。GitHubは使いません。
+    </div>
+    <div style="margin-top:24px">
+      <button class="btn-back" onclick="goTo('page-start')">← トップに戻る</button>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<script>
+  // ====== NAVIGATION STATE ======
+  const history = [];
+  const breadcrumbLabels = {
+    'page-start': 'スタート',
+    'page-s-github': 'GitHubアカウント',
+    'page-s-create-github': 'アカウント作成',
+    'page-s-org-invite': 'Organization招待',
+    'page-s-wait-org': '招待待ち',
+    'page-s-accept-org': '招待を承認',
+    'page-s-vscode': 'VS Code',
+    'page-s-install-vscode': 'VS Codeインストール',
+    'page-s-git': 'Git',
+    'page-s-install-git': 'Gitインストール',
+    'page-s-rojo': 'Rojo',
+    'page-s-install-rojo': 'Rojoインストール',
+    'page-s-clone': 'クローン',
+    'page-s-rojo-plugin': 'Studioプラグイン',
+    'page-s-start-rojo': 'Rojo起動',
+    'page-s-workflow': 'Gitワークフロー',
+    'page-s-done': '完了！',
+    'page-a-intro': 'アセット制作者',
+    'page-a-studio-check': 'Studio確認',
+    'page-a-install-studio': 'Studioインストール',
+    'page-a-asset-manage': 'アセット管理',
+    'page-a-upload': 'アップロード',
+    'page-a-asset-manager': 'Asset Manager',
+    'page-a-done': '完了！',
+  };
+
+  let currentPage = 'page-start';
+
+  function goTo(pageId) {
+    const prev = document.getElementById(currentPage);
+    const next = document.getElementById(pageId);
+    if (!next) return;
+
+    if (currentPage !== pageId) history.push(currentPage);
+    prev.classList.remove('active');
+    next.classList.add('active');
+    currentPage = pageId;
+
+    updateBreadcrumb();
+    updateProgress(next);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function updateBreadcrumb() {
+    const bc = document.getElementById('breadcrumb');
+    bc.innerHTML = '';
+    const trail = [...history, currentPage];
+    // Deduplicate consecutive
+    const unique = trail.filter((v, i) => i === 0 || v !== trail[i - 1]);
+    unique.forEach((id, idx) => {
+      const label = breadcrumbLabels[id] || id;
+      if (idx < unique.length - 1) {
+        const span = document.createElement('span');
+        span.className = 'bc-item';
+        span.textContent = label;
+        span.onclick = () => goTo(id);
+        bc.appendChild(span);
+        const sep = document.createElement('span');
+        sep.className = 'bc-sep';
+        sep.textContent = ' › ';
+        bc.appendChild(sep);
+      } else {
+        const span = document.createElement('span');
+        span.className = 'bc-current';
+        span.textContent = label;
+        bc.appendChild(span);
+      }
+    });
+  }
+
+  function updateProgress(pageEl) {
+    const progress = pageEl.getAttribute('data-progress');
+    const wrap = document.getElementById('progress-bar-wrap');
+    if (progress !== null) {
+      wrap.style.display = 'block';
+      document.getElementById('progress-bar-fill').style.width = progress + '%';
+      document.getElementById('progress-label').textContent = '進捗: ' + progress + '%';
+    } else {
+      wrap.style.display = 'none';
+    }
+  }
+
+  // ====== OS TAB SWITCHER ======
+  function switchOS(btn, contentId) {
+    // Deactivate all tabs in same group
+    const tabGroup = btn.parentElement;
+    tabGroup.querySelectorAll('.os-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+
+    // Find all os-content siblings
+    const parent = tabGroup.parentElement;
+    parent.querySelectorAll('.os-content').forEach(c => c.classList.remove('active'));
+    const target = parent.querySelector('#' + contentId);
+    if (target) target.classList.add('active');
+  }
+
+  // Initial breadcrumb (empty on start)
+  updateBreadcrumb();
+</script>
+</body>
+</html>
