@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VS Code で Claude Code を使う | VR-SKATE</title>
+  <style>
+    :root {
+      --primary: #cc785c;
+      --primary-dark: #a85e46;
+      --secondary: #0066cc;
+      --accent: #00b06b;
+      --bg: #f8f9fa;
+      --card-bg: #ffffff;
+      --text: #1a1a2e;
+      --text-muted: #6b7280;
+      --border: #e5e7eb;
+      --shadow: 0 4px 24px rgba(0,0,0,0.08);
+      --radius: 16px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', 'Hiragino Sans', 'Meiryo', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1a1a2e 0%, #2d1b69 50%, #1a1a2e 100%);
+      color: white;
+      padding: 24px 32px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.3);
+    }
+    header .logo { font-size: 22px; font-weight: 800; }
+    header .logo span { color: #cc785c; }
+    header .subtitle { font-size: 13px; opacity: 0.65; margin-top: 4px; }
+
+    /* BREADCRUMB */
+    #breadcrumb {
+      background: white;
+      border-bottom: 1px solid var(--border);
+      padding: 10px 32px;
+      font-size: 13px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      min-height: 40px;
+    }
+    .bc-item { cursor: pointer; color: var(--secondary); }
+    .bc-item:hover { text-decoration: underline; }
+    .bc-sep { color: #ccc; }
+    .bc-current { color: var(--text-muted); }
+
+    main {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+    }
+
+    .page { display: none; animation: fadeIn 0.3s ease; }
+    .page.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 36px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      margin-bottom: 20px;
+    }
+
+    .page-number {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+    h1 { font-size: 24px; font-weight: 800; margin-bottom: 16px; line-height: 1.3; }
+    h2 { font-size: 17px; font-weight: 700; margin: 24px 0 10px; }
+    p { font-size: 15px; line-height: 1.75; margin-bottom: 12px; }
+
+    /* YES/NO */
+    .yn-group {
+      display: flex;
+      gap: 16px;
+      margin: 24px 0;
+      flex-wrap: wrap;
+    }
+    .btn-yn {
+      flex: 1;
+      min-width: 160px;
+      padding: 20px 24px;
+      border-radius: 12px;
+      border: 2px solid transparent;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 700;
+      text-align: center;
+      transition: all 0.2s ease;
+    }
+    .btn-yes { background: #e8f9f1; border-color: var(--accent); color: #008a54; }
+    .btn-yes:hover { background: var(--accent); color: white; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,176,107,0.3); }
+    .btn-no { background: #fff2ee; border-color: var(--primary); color: var(--primary-dark); }
+    .btn-no:hover { background: var(--primary); color: white; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(204,120,92,0.3); }
+
+    /* NEXT/BACK */
+    .btn-next {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 14px 28px;
+      background: linear-gradient(135deg, var(--secondary), #004ea6);
+      color: white; border: none;
+      border-radius: 10px;
+      font-size: 15px; font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 8px;
+    }
+    .btn-next:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,102,204,0.35); }
+
+    .btn-back {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 10px 18px;
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-right: 12px;
+    }
+    .btn-back:hover { background: var(--bg); color: var(--text); }
+
+    /* INFO BOXES */
+    .info-box {
+      border-left: 4px solid var(--secondary);
+      background: #f0f6ff;
+      padding: 14px 18px;
+      border-radius: 0 10px 10px 0;
+      margin: 14px 0;
+      font-size: 14px;
+      line-height: 1.7;
+    }
+    .info-box.tip { border-left-color: #8b5cf6; background: #f5f3ff; }
+    .info-box.warn { border-left-color: #f59e0b; background: #fffbeb; }
+    .info-box.success { border-left-color: var(--accent); background: #f0faf6; }
+    .info-box.danger { border-left-color: #ef4444; background: #fff5f5; }
+    .info-box strong { display: block; margin-bottom: 5px; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.7; }
+
+    /* STEPS */
+    .steps { list-style: none; margin: 14px 0; }
+    .steps li { display: flex; gap: 14px; margin-bottom: 14px; align-items: flex-start; }
+    .step-num {
+      flex-shrink: 0;
+      width: 28px; height: 28px;
+      background: var(--secondary);
+      color: white;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700;
+      margin-top: 2px;
+    }
+    .step-body { flex: 1; font-size: 15px; line-height: 1.7; }
+
+    /* PRICE TABLE */
+    .plan-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; }
+    .plan-table th, .plan-table td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--border); }
+    .plan-table th { background: #f3f4f6; font-weight: 700; color: var(--text-muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .plan-table tr:last-child td { border-bottom: none; }
+    .plan-table .recommended { background: #f0f6ff; font-weight: 700; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 700; }
+    .badge-ok { background: #dcfce7; color: #166534; }
+    .badge-best { background: #dbeafe; color: #1e40af; }
+    .badge-no { background: #fee2e2; color: #991b1b; }
+
+    /* CODE */
+    .code-block {
+      background: #1e1e2e;
+      color: #cdd6f4;
+      border-radius: 10px;
+      padding: 16px 20px;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 14px;
+      margin: 12px 0;
+      overflow-x: auto;
+      line-height: 1.7;
+    }
+    .code-block .cmd { color: #89dceb; }
+
+    .hl { background: #fef9c3; padding: 1px 4px; border-radius: 4px; }
+    kbd {
+      display: inline-block;
+      padding: 2px 8px;
+      background: #f3f4f6;
+      border: 1px solid #d1d5db;
+      border-bottom: 3px solid #9ca3af;
+      border-radius: 5px;
+      font-family: monospace;
+      font-size: 13px;
+    }
+
+    /* IMAGE PLACEHOLDER */
+    .img-placeholder {
+      background: #f3f4f6;
+      border: 2px dashed #d1d5db;
+      border-radius: 10px;
+      padding: 24px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 13px;
+      margin: 14px 0;
+    }
+    .img-placeholder .icon { font-size: 28px; margin-bottom: 6px; }
+
+    /* COMPLETION */
+    .completion-box { text-align: center; padding: 32px 16px; }
+    .completion-icon { font-size: 60px; margin-bottom: 14px; }
+    .completion-title { font-size: 22px; font-weight: 800; margin-bottom: 10px; }
+    .completion-desc { color: var(--text-muted); font-size: 15px; line-height: 1.7; }
+    hr { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
+
+    @media (max-width: 600px) {
+      main { padding: 24px 16px 60px; }
+      .card { padding: 24px 18px; }
+      h1 { font-size: 20px; }
+      .yn-group { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo"><span>VR</span>-SKATE</div>
+  <div class="subtitle">VS Code で Claude Code を使う ／ セットアップマニュアル</div>
+</header>
+
+<div id="breadcrumb"></div>
+
+<main>
+
+<!-- ===== START ===== -->
+<div class="page active" id="page-start" data-title="スタート">
+  <div class="card">
+    <div class="page-number">ようこそ</div>
+    <h1>🤖 VS Code で Claude Code を<br>使えるようにしよう</h1>
+    <p>このマニュアルでは、VS Code上でAIコーディングアシスタント「Claude Code」を使えるようにするまでの手順を案内します。</p>
+    <div class="info-box warn">
+      <strong>⚠️ 事前に確認</strong>
+      Claude Codeの使用には <strong>Claudeの有料プラン（Pro以上）</strong> が必要です。無料プランでは利用できません。詳しくはこのマニュアルの中で説明します。
+    </div>
+    <p>まず、Claudeのアカウントはすでに持っていますか？</p>
+    <div class="yn-group">
+      <button class="btn-yn btn-yes" onclick="goTo('page-plan-check')">✅ はい、持っています</button>
+      <button class="btn-yn btn-no" onclick="goTo('page-create-account')">❌ いいえ、持っていません</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== アカウント作成 ===== -->
+<div class="page" id="page-create-account" data-title="Claudeアカウント作成">
+  <div class="card">
+    <div class="page-number">ステップ 1-a</div>
+    <h1>🔐 Claudeアカウントを作成する</h1>
+    <ul class="steps">
+      <li>
+        <div class="step-num">1</div>
+        <div class="step-body">ブラウザで <a href="https://claude.ai" target="_blank">https://claude.ai</a> を開く</div>
+      </li>
+      <li>
+        <div class="step-num">2</div>
+        <div class="step-body">右上または中央の <span class="hl">Sign up</span> をクリック</div>
+      </li>
+      <li>
+        <div class="step-num">3</div>
+        <div class="step-body">メールアドレスで登録、またはGoogleアカウントで続行</div>
+      </li>
+      <li>
+        <div class="step-num">4</div>
+        <div class="step-body">確認メールが届いたらリンクをクリックして認証を完了する</div>
+      </li>
+      <li>
+        <div class="step-num">5</div>
+        <div class="step-body">ログインできたらアカウント作成完了。次のステップで課金プランを確認します</div>
+      </li>
+    </ul>
+    <button class="btn-next" onclick="goTo('page-plan-check')">アカウント作成完了 → 次へ ›</button>
+  </div>
+  <div style="margin-top:8px"><button class="btn-back" onclick="goTo('page-start')">← 前に戻る</button></div>
+</div>
+
+<!-- ===== プラン確認 ===== -->
+<div class="page" id="page-plan-check" data-title="プラン確認">
+  <div class="card">
+    <div class="page-number">ステップ 2</div>
+    <h1>💳 有料プランに加入していますか？</h1>
+    <p>Claude Codeを使うには <strong>Proプラン以上</strong> の加入が必要です。</p>
+
+    <table class="plan-table">
+      <thead>
+        <tr><th>プラン</th><th>月額</th><th>Claude Code</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Free（無料）</td>
+          <td>$0</td>
+          <td><span class="badge badge-no">❌ 使用不可</span></td>
+        </tr>
+        <tr class="recommended">
+          <td>Pro ★おすすめ</td>
+          <td>$20 / 月</td>
+          <td><span class="badge badge-ok">✅ 使用可</span></td>
+        </tr>
+        <tr>
+          <td>Max</td>
+          <td>$100〜$200 / 月</td>
+          <td><span class="badge badge-best">✅ 使用量大</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="info-box tip">
+      <strong>💡 どのプランを選ぶ？</strong>
+      個人での開発・学習目的であれば <strong>Pro（$20/月）</strong> で十分です。使用量が多くなってきたら Maxプランへの移行を検討してください。
+    </div>
+
+    <p>有料プランに加入していますか？</p>
+    <div class="yn-group">
+      <button class="btn-yn btn-yes" onclick="goTo('page-vscode-check')">✅ はい、加入しています</button>
+      <button class="btn-yn btn-no" onclick="goTo('page-upgrade')">❌ まだ加入していない</button>
+    </div>
+  </div>
+  <div style="margin-top:8px"><button class="btn-back" onclick="goTo('page-start')">← 前に戻る</button></div>
+</div>
+
+<!-- ===== 課金手順 ===== -->
+<div class="page" id="page-upgrade" data-title="プランのアップグレード">
+  <div class="card">
+    <div class="page-number">ステップ 2-a</div>
+    <h1>💳 Proプランにアップグレードする</h1>
+    <ul class="steps">
+      <li>
+        <div class="step-num">1</div>
+        <div class="step-body"><a href="https://claude.ai" target="_blank">https://claude.ai</a> にログインする</div>
+      </li>
+      <li>
+        <div class="step-num">2</div>
+        <div class="step-body">左下のアカウントメニュー → <span class="hl">Upgrade plan</span> をクリック</div>
+      </li>
+      <li>
+        <div class="step-num">3</div>
+        <div class="step-body"><span class="hl">Pro</span> プランを選択して <span class="hl">Subscribe</span> をクリック</div>
+      </li>
+      <li>
+        <div class="step-num">4</div>
+        <div class="step-body">クレジットカード情報を入力して支払いを完了する（$20/月）</div>
+      </li>
+    </ul>
+    <div class="info-box warn">
+      <strong>⚠️ 注意</strong>
+      支払いはAnthropicに対して行われます。サブスクリプションはいつでもキャンセル可能です。
+    </div>
+    <button class="btn-next" onclick="goTo('page-vscode-check')">加入完了 → 次へ ›</button>
+  </div>
+  <div style="margin-top:8px"><button class="btn-back" onclick="goTo('page-plan-check')">← 前に戻る</button></div>
+</div>
+
+<!-- ===== VS Code バージョン確認 ===== -->
+<div class="page" id="page-vscode-check" data-title="VS Codeバージョン確認">
+  <div class="card">
+    <div class="page-number">ステップ 3</div>
+    <h1>🖊️ VS Codeのバージョンを確認する</h1>
+    <p>Claude Codeの拡張機能には <strong>VS Code 1.98.0 以上</strong> が必要です。</p>
+
+    <h2>バージョン確認方法</h2>
+    <ul class="steps">
+      <li>
+        <div class="step-num">1</div>
+        <div class="step-body">
+          VS Codeを開く<br>
+          <strong>Mac：</strong> メニューバー → <span class="hl">Code</span> → <span class="hl">About Visual Studio Code</span><br>
+          <strong>Windows：</strong> メニューバー → <span class="hl">Help</span> → <span class="hl">About</span>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">2</div>
+        <div class="step-body">表示されたバージョン番号が <strong>1.98.0 以上</strong> であれば問題なし</div>
+      </li>
+    </ul>
+
+    <p>バージョンは1.98.0以上でしたか？</p>
+    <div class="yn-group">
+      <button class="btn-yn btn-yes" onclick="goTo('page-install-ext')">✅ はい、問題ありません</button>
+      <button class="btn-yn btn-no" onclick="goTo('page-update-vscode')">❌ 古いバージョンでした</button>
+    </div>
+  </div>
+  <div style="margin-top:8px"><button class="btn-back" onclick="goTo('page-plan-check')">← 前に戻る</button></div>
+</div>
+
+<!-- ===== VS Code アップデート ===== -->
+<div class="page" id="page-update-vscode" data-title="VS Codeをアップデート">
+  <div class="card">
+    <div class="page-number">ステップ 3-a</div>
+    <h1>⬆️ VS Code をアップデートする</h1>
+    <ul class="steps">
+      <li>
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <strong>Mac：</strong> メニューバー → <span class="hl">Help</span> → <span class="hl">Check for Updates</span><br>
+          <strong>Windows：</strong> メニューバー → <span class="hl">Help</span> → <span class="hl">Check for Updates</span>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">2</div>
+        <div class="step-body">アップデートがあれば <span class="hl">Download Update</span> → <span class="hl">Restart to Apply</span></div>
+      </li>
+      <li>
+        <div class="step-num">3</div>
+        <div class="step-body">再起動後、バージョンが 1.98.0 以上になっていることを確認する</div>
+      </li>
+    </ul>
+    <div class="info-box">
+      <strong>ℹ️ アップデートが表示されない場合</strong>
+      <a href="https://code.visualstudio.com/download" target="_blank">https://code.visualstudio.com/download</a> から最新版を直接ダウンロードできます。
+    </div>
+    <button class="btn-next" onclick="goTo('page-install-ext')">アップデート完了 → 次へ ›</button>
+  </div>
+  <div style="margin-top:8px"><button class="btn-back" onclick="goTo('page-vscode-check')">← 前に戻る</button></div>
+</div>
+
+<!-- ===== 拡張機能インストール ===== -->
+<div class="page" id="page-install-ext" data-title="拡張機能インストール">
+  <div class="card">
+    <div class="page-number">ステップ 4</div>
+    <h1>🔌 Claude Code拡張機能をインストールする</h1>
+
+    <ul class="steps">
+      <li>
+        <div class="step-num">1</div>
+        <div class="step-body">
+          VS Codeの左サイドバーにある <span class="hl">拡張機能アイコン（田）</span> をクリック<br>
+          またはキーボードショートカット：<kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>X</kbd>（Mac）／ <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>X</kbd>（Windows）
+        </div>
+      </li>
+      <li>
+        <div class="step-num">2</div>
+        <div class="step-body">
+          検索バーに <strong>Claude Code</strong> と入力する
+        </div>
+      </li>
+      <li>
+        <div class="step-num">3</div>
+        <div class="step-body">
+          発行者が <strong>Anthropic</strong> のものを選ぶ（<code>anthropic.claude-code</code>）<br>
+          <div class="info-box warn" style="margin-top:8px">
+            <strong>⚠️ 注意</strong>
+            Anthropic公式以外の「Claude Code」という名前の拡張機能も存在します。必ず発行者が <strong>Anthropic</strong> のものをインストールしてください。
+          </div>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">4</div>
+        <div class="step-body"><span class="hl">Install（インストール）</span> をクリック</div>
+      </li>
+      <li>
+        <div class="step-num">5</div>
+        <div class="step-body">
+          インストール後にアイコンが表示されない場合は、VS Codeを再起動する<br>
+          <kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd> → <code>Developer: Reload Window</code> でも可
+        </div>
+      </li>
+    </ul>
+
+    <div class="img-placeholder">
+      <div class="icon">🖼️</div>
+      拡張機能の検索画面（スクリーンショットをここに追加できます）
+    </div>
+
+    <button class="btn-next" onclick="goTo('page-signin')">インストール完了 → 次へ ›</button>
+  </div>
+  <div style="margin-top:8px"><button class="btn-back" onclick="goTo('page-vscode-check')">← 前に戻る</button></div>
+</div>
+
+<!-- ===== サインイン ===== -->
+<div class="page" id="page-signin" data-title="サインイン">
+  <div class="card">
+    <div class="page-number">ステップ 5</div>
+    <h1>🔑 Claudeアカウントでサインインする</h1>
+
+    <ul class="steps">
+      <li>
+        <div class="step-num">1</div>
+        <div class="step-body">
+          VS Codeエディター右上に <span class="hl">✦（スパークアイコン）</span> が表示される<br>
+          ※ファイルを開いていないと表示されません。適当なファイルを開いてください
+        </div>
+      </li>
+      <li>
+        <div class="step-num">2</div>
+        <div class="step-body">
+          スパークアイコンをクリックすると、右側にClaudeのパネルが開く
+          <div class="img-placeholder" style="margin-top:8px">
+            <div class="icon">🖼️</div>
+            スパークアイコンの位置（スクリーンショットをここに追加できます）
+          </div>
+        </div>
+      </li>
+      <li>
+        <div class="step-num">3</div>
+        <div class="step-body">
+          パネル内の <span class="hl">Sign in</span> ボタンをクリックする
+        </div>
+      </li>
+      <li>
+        <div class="step-num">4</div>
+        <div class="step-body">
+          ブラウザが開くので、Claudeアカウントでログインして認証を完了する
+        </div>
+      </li>
+      <li>
+        <div class="step-num">5</div>
+        <div class="step-body">
+          VS Codeに戻ると、Claudeのチャットパネルが使えるようになっている 🎉
+        </div>
+      </li>
+    </ul>
+
+    <div class="info-box tip">
+      <strong>💡 スパークアイコンが見当たらない場合</strong>
+      VS Code下部のステータスバー右端に <span class="hl">✱ Claude Code</span> と表示されているのでそちらをクリックしても開けます。またはコマンドパレット（<kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd>）から <code>Claude Code</code> と入力して選択。
+    </div>
+
+    <button class="btn-next" onclick="goTo('page-basic-usage')">サインイン完了 → 使い方を見る ›</button>
+  </div>
+  <div style="margin-top:8px"><button class="btn-back" onclick="goTo('page-install-ext')">← 前に戻る</button></div>
+</div>
+
+<!-- ===== 基本的な使い方 ===== -->
+<div class="page" id="page-basic-usage" data-title="基本的な使い方">
+  <div class="card">
+    <div class="page-number">ステップ 6</div>
+    <h1>💬 Claude Codeの基本的な使い方</h1>
+
+    <h2>① コードについて質問する</h2>
+    <p>チャットパネルの入力欄に自由に質問を入力してEnterを押すだけです。</p>
+    <div class="info-box">
+      <strong>例</strong>
+      「このスクリプトのエラーの原因を教えて」<br>
+      「◯◯という機能を追加するにはどうすればいい？」<br>
+      「このコードをもっと読みやすく書き直して」
+    </div>
+
+    <h2>② ファイルを指定して質問する（@メンション）</h2>
+    <p>入力欄で <code>@</code> と入力するとファイル名の候補が出ます。ファイルを選ぶとClaudeがそのファイルを読んだ状態で返答してくれます。</p>
+    <div class="info-box tip">
+      <strong>💡 ショートカット</strong>
+      エディターでコードを選択した状態で <kbd>Option</kbd>+<kbd>K</kbd>（Mac）／<kbd>Alt</kbd>+<kbd>K</kbd>（Windows）を押すと、そのファイルと行番号を自動でメンションできます。
+    </div>
+
+    <h2>③ 変更の確認と承認</h2>
+    <p>Claudeがファイルを編集する場合、変更前と変更後の差分が表示されます。内容を確認してから <span class="hl">Accept（承認）</span> または <span class="hl">Reject（却下）</span> を選べます。</p>
+
+    <div class="img-placeholder">
+      <div class="icon">🖼️</div>
+      差分表示画面（スクリーンショットをここに追加できます）
+    </div>
+
+    <h2>④ パネルの場所を変える</h2>
+    <p>Claudeのパネルはドラッグして好きな位置に移動できます。右サイドバーに置くとコードを書きながら使いやすいです。</p>
+
+    <div class="info-box warn">
+      <strong>⚠️ 使用量の上限について</strong>
+      Proプランには1日あたりの使用量制限があります。上限に達した場合は翌日にリセットされます。
+    </div>
+
+    <button class="btn-next" onclick="goTo('page-done')">完了！ ›</button>
+  </div>
+  <div style="margin-top:8px"><button class="btn-back" onclick="goTo('page-signin')">← 前に戻る</button></div>
+</div>
+
+<!-- ===== 完了 ===== -->
+<div class="page" id="page-done" data-title="セットアップ完了">
+  <div class="card">
+    <div class="completion-box">
+      <div class="completion-icon">🤖</div>
+      <div class="completion-title">セットアップ完了！</div>
+      <p class="completion-desc">
+        VS Code上でClaude Codeが使えるようになりました。<br>
+        わからないことがあればDiscordで質問してください。
+      </p>
+    </div>
+    <hr>
+    <h2>📋 チェックリスト</h2>
+    <ul class="steps">
+      <li><div class="step-num">✅</div><div class="step-body">Claudeアカウント作成済み</div></li>
+      <li><div class="step-num">✅</div><div class="step-body">Proプラン以上に加入済み</div></li>
+      <li><div class="step-num">✅</div><div class="step-body">VS Code 1.98.0以上を使用</div></li>
+      <li><div class="step-num">✅</div><div class="step-body">Claude Code拡張機能（Anthropic製）をインストール済み</div></li>
+      <li><div class="step-num">✅</div><div class="step-body">Claudeアカウントでサインイン済み</div></li>
+    </ul>
+    <div style="margin-top:24px">
+      <button class="btn-back" onclick="goTo('page-start')">← トップに戻る</button>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<script>
+  const history = [];
+  const labels = {
+    'page-start': 'スタート',
+    'page-create-account': 'アカウント作成',
+    'page-plan-check': 'プラン確認',
+    'page-upgrade': 'プランアップグレード',
+    'page-vscode-check': 'VS Codeバージョン',
+    'page-update-vscode': 'VS Codeアップデート',
+    'page-install-ext': '拡張機能インストール',
+    'page-signin': 'サインイン',
+    'page-basic-usage': '基本的な使い方',
+    'page-done': '完了！',
+  };
+  let current = 'page-start';
+
+  function goTo(pageId) {
+    const prev = document.getElementById(current);
+    const next = document.getElementById(pageId);
+    if (!next) return;
+    if (current !== pageId) history.push(current);
+    prev.classList.remove('active');
+    next.classList.add('active');
+    current = pageId;
+    updateBreadcrumb();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function updateBreadcrumb() {
+    const bc = document.getElementById('breadcrumb');
+    bc.innerHTML = '';
+    const trail = [...history, current];
+    const unique = trail.filter((v, i) => i === 0 || v !== trail[i - 1]);
+    unique.forEach((id, idx) => {
+      const label = labels[id] || id;
+      if (idx < unique.length - 1) {
+        const span = document.createElement('span');
+        span.className = 'bc-item';
+        span.textContent = label;
+        span.onclick = () => goTo(id);
+        bc.appendChild(span);
+        const sep = document.createElement('span');
+        sep.className = 'bc-sep';
+        sep.textContent = ' › ';
+        bc.appendChild(sep);
+      } else {
+        const span = document.createElement('span');
+        span.className = 'bc-current';
+        span.textContent = label;
+        bc.appendChild(span);
+      }
+    });
+  }
+
+  updateBreadcrumb();
+</script>
+
+</body>
+</html>
