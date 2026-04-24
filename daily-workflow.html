@@ -306,6 +306,7 @@
         <span class="cmd">rojo serve</span>
       </div>
       <p><code>Serving on port 34872</code> のようなメッセージが出たらOK。</p>
+      <p>※すでにRojoと接続されている場合はエラーがでます。</p>
 
       <h2>Roblox Studioと接続する</h2>
       <ul class="steps">
@@ -340,7 +341,9 @@
       <h2>① 変更を確認する</h2>
       <div class="code-block">
         <span class="comment"># 変更されたファイルの一覧を確認</span><br>
-        <span class="cmd">git status</span>
+        <span class="cmd">git status</span><br>
+        <span class="comment">※都度Claudeでコミットしていれば、ここでは修正ファイル一覧は表示されません</span><br>
+
       </div>
 
       <h2>② 変更をステージングする</h2>
@@ -352,7 +355,8 @@
       <h2>③ コミットする</h2>
       <div class="code-block">
         <span class="comment"># 変更内容がわかるメッセージをつけて記録する</span><br>
-        <span class="cmd">git commit -m "スコアボードを追加"</span>
+        <span class="cmd">git commit -m "スコアボードを追加"</span><br>
+        <span class="comment">※都度Claudeでコミットしていれば、このコマンドは不要</span><br>
       </div>
       <div class="info-box">
         <strong>ℹ️ コミットメッセージについて</strong>
@@ -392,7 +396,7 @@
         <li>
           <div class="step-num">2</div>
           <div class="step-body">
-            画面上部に緑色のバナーで <span class="hl">Compare &amp; pull request</span> ボタンが表示されるのでクリック<br>
+            画面上部に緑色のボタンで <span class="hl">Compare &amp; pull request</span> ボタンが表示されるのでクリック<br>
             <small>（表示されない場合は <span class="hl">Pull requests</span> タブ → <span class="hl">New pull request</span>）</small>
           </div>
         </li>
@@ -406,7 +410,7 @@
         <li>
           <div class="step-num">4</div>
           <div class="step-body">
-            <span class="hl">Create pull request</span> をクリック
+            緑色のボタン<span class="hl">Create pull request</span> をクリック
           </div>
         </li>
         <li>
